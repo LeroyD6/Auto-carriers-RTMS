@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Track monthly fuel and oil spills for 2024 vs 2025 and download supporting registers.">
+    <title>Spill Performance | KDG Logistics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link href="../styles/dashboard.css" rel="stylesheet">
+</head>
+
+<body>
+    <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="home.html">KDG Logistics</a>
+        <div class="d-flex align-items-center gap-2 me-3">
+            <a class="btn btn-outline-light btn-sm" href="reports.html">Reports hub</a>
+            <a class="btn btn-success btn-sm" href="../../public/pdf/IncidentInvestReps/ESD 004 A_INCIDENT SUMMARY REGISTER 2025.pdf"
+                download>
+                Download 2025 register
+            </a>
+            <a class="btn btn-danger btn-sm" href="../../public/pdf/Sup docs/ESD 004 A_INCIDENT SUMMARY REGISTER (version 1).pdf"
+                download>
+                Download 2024 register
+            </a>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        <section class="page-hero">
+            <span class="badge">Incident trend</span>
+            <h1>Spills per month 2025 vs 2024</h1>
+            <p>Quickly compare the fuel and oil spill counts per month to prove that controls are stabilising. All
+                figures flow from the latest incident summary registers. For more details, download the registers using
+                the buttons above.</p>
+            <div class="hero-actions">
+                <button class="btn btn-success" type="button" data-scroll-target="#chart-panel">View chart</button>
+                <button class="btn btn-outline-light" type="button" data-scroll-target="#table-panel">Jump to
+                    table</button>
+            </div>
+        </section>
+
+        <section class="insights-grid" aria-label="Headline metrics">
+            <article class="stat-card">
+                <p class="stat-label">Total spills 2025</p>
+                <p class="stat-value" id="stat-total-2025">--</p>
+                <p class="stat-trend" id="stat-total-delta">--</p>
+                <p class="stat-note">Δ vs 2024</p>
+            </article>
+            <article class="stat-card">
+                <p class="stat-label">Best month 2025</p>
+                <p class="stat-value" id="stat-best">--</p>
+                <p class="stat-note">Months with zero spills</p>
+            </article>
+            <article class="stat-card">
+                <p class="stat-label">Worst month 2025</p>
+                <p class="stat-value" id="stat-worst">--</p>
+                <p class="stat-note">View incident reports for further details</p>
+            </article>
+        </section>
+
+        <section class="data-panel" id="chart-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Visual comparison</p>
+                    <h2>Monthly spill counts</h2>
+                    <p>Grouped bars make it easy to spot progress and regressions vs the 2024 baseline.</p>
+                </div>
+            </div>
+            <div class="chart-wrapper" style="height:380px">
+                <canvas id="spillsChart" role="img" aria-label="Monthly spills comparison chart"></canvas>
+            </div>
+        </section>
+
+        <section class="data-panel" id="table-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Supporting data</p>
+                    <h2>Spill register snapshot</h2>
+                    <p>Filter a month to get the exact 2024 vs 2025 count and delta.</p>
+                </div>
+                <div class="table-controls">
+                    <input type="search" class="table-search" placeholder="Search month"
+                        data-table-filter="spills-table">
+                </div>
+            </div>
+            <div class="doc-table-wrapper">
+                <table class="doc-table" id="spills-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Month</th>
+                            <th scope="col">2024 spills</th>
+                            <th scope="col">2025 spills</th>
+                            <th scope="col">Δ 2025-2024</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <th scope="row">Totals</th>
+                            <td id="table-total-2024">--</td>
+                            <td id="table-total-2025">--</td>
+                            <td id="table-total-delta">--</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <p class="table-caption">Δ values show positive numbers when 2025 recorded more spills than 2024.</p>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"
+        integrity="sha384-gdQErvCNWvHQZj6XZM0dNsAoY4v+j5P1XDpNkcM3HJG1Yx04ecqIHk7+4VBOCHOG"
+        crossorigin="anonymous"></script>
+    <script>
+        const dataset = {
+            months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+            spills2024: [2, 3, 0, 0, 2, 1, 1, 0, 0, 3, 1, 2],
+            spills2025: [1, 0, 2, 3, 0, 1, 2, 0, 0, 0, 2, 2]
+        };
+
+        const numberFormatter = new Intl.NumberFormat("en-ZA", { maximumFractionDigits: 0 });
+        const percentFormatter = new Intl.NumberFormat("en-ZA", { maximumFractionDigits: 1 });
+
+        function buildChart() {
+            const canvas = document.getElementById("spillsChart");
+            if (!canvas) return null;
+            return new Chart(canvas, {
+                type: "bar",
+                data: {
+                    labels: dataset.months,
+                    datasets: [
+                        {
+                            label: "2025",
+                            data: dataset.spills2025,
+                            backgroundColor: "rgba(247, 162, 82, 0.7)",
+                            borderRadius: 6,
+                        },
+                        {
+                            label: "2024",
+                            data: dataset.spills2024,
+                            backgroundColor: "rgba(15, 179, 108, 0.75)",
+                            borderRadius: 6,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { intersect: false, mode: "index" },
+                    plugins: {
+                        legend: {
+                            labels: { color: "#c8d5cf", font: { family: "Space Grotesk" } }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: false,
+                            ticks: { color: "#9aa79f" },
+                            grid: { color: "rgba(255,255,255,0.05)" }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: "#9aa79f", stepSize: 1 },
+                            grid: { color: "rgba(255,255,255,0.08)" },
+                            title: { display: true, text: "Spills", color: "#c8d5cf" }
+                        }
+                    }
+                }
+            });
+        }
+
+        function populateStats() {
+            const total2024 = dataset.spills2024.reduce((sum, value) => sum + value, 0);
+            const total2025 = dataset.spills2025.reduce((sum, value) => sum + value, 0);
+            const delta = total2025 - total2024;
+            document.getElementById("stat-total-2025").textContent = numberFormatter.format(total2025);
+            const percentChange = total2024 === 0 ? null : (Math.abs(delta) / total2024) * 100;
+            let trendClass = "trend-flat";
+            let arrow = "&rarr;";
+            let descriptor = "No change";
+            if (delta < 0) {
+                trendClass = "trend-down";
+                arrow = "&darr;";
+                descriptor = "Improvement";
+            } else if (delta > 0) {
+                trendClass = "trend-up";
+                arrow = "&uarr;";
+                descriptor = "More spills";
+            }
+            const percentLabel = percentChange === null ? "n/a" : `${percentFormatter.format(percentChange)}%`;
+            const deltaLabel = delta === 0 ? "No change vs 2024" : `${delta >= 0 ? "+" : ""}${numberFormatter.format(delta)} vs 2024`;
+            const trendMarkup = `
+                <span class="trend-indicator ${trendClass}">${arrow} ${percentLabel} ${descriptor}</span>
+                <span class="trend-delta">${deltaLabel}</span>
+            `;
+            const trendTarget = document.getElementById("stat-total-delta");
+            if (trendTarget) {
+                trendTarget.innerHTML = trendMarkup;
+            }
+            const total2024Cell = document.getElementById("table-total-2024");
+            const total2025Cell = document.getElementById("table-total-2025");
+            const totalDeltaCell = document.getElementById("table-total-delta");
+            if (total2024Cell) total2024Cell.textContent = numberFormatter.format(total2024);
+            if (total2025Cell) total2025Cell.textContent = numberFormatter.format(total2025);
+            if (totalDeltaCell) {
+                totalDeltaCell.innerHTML = trendMarkup;
+                totalDeltaCell.classList.remove("variance-positive", "variance-negative");
+                if (delta > 0) {
+                    totalDeltaCell.classList.add("variance-positive");
+                } else if (delta < 0) {
+                    totalDeltaCell.classList.add("variance-negative");
+                }
+            }
+            const bestMonths = dataset.months.filter((_, index) => dataset.spills2025[index] === 0);
+            document.getElementById("stat-best").textContent = bestMonths.length ? bestMonths.join(", ") : "None";
+            const maxValue = Math.max(...dataset.spills2025);
+            const worstIndex = dataset.spills2025.findIndex((value) => value === maxValue);
+            document.getElementById("stat-worst").textContent = `${dataset.months[worstIndex]} (${maxValue})`;
+        }
+
+        function buildTable() {
+            const tbody = document.querySelector("#spills-table tbody");
+            if (!tbody) return;
+            tbody.innerHTML = "";
+            dataset.months.forEach((month, index) => {
+                const value2024 = dataset.spills2024[index];
+                const value2025 = dataset.spills2025[index];
+                const delta = value2025 - value2024;
+                const percentChange = value2024 === 0 ? null : (Math.abs(delta) / value2024) * 100;
+                let trendClass = "trend-flat";
+                let arrow = "&rarr;";
+                let descriptor = "No change";
+                if (delta < 0) {
+                    trendClass = "trend-down";
+                    arrow = "&darr;";
+                    descriptor = "Fewer spills";
+                } else if (delta > 0) {
+                    trendClass = "trend-up";
+                    arrow = "&uarr;";
+                    descriptor = "More spills";
+                }
+                const percentLabel = percentChange === null ? "n/a" : `${percentFormatter.format(percentChange)}%`;
+                const deltaLabel = delta === 0 ? "No change vs 2024" : `${delta > 0 ? "+" : ""}${numberFormatter.format(delta)} vs 2024`;
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${month}</td>
+                    <td>${numberFormatter.format(value2024)}</td>
+                    <td>${numberFormatter.format(value2025)}</td>
+                    <td class="${delta > 0 ? "variance-positive" : delta < 0 ? "variance-negative" : ""}">
+                        <span class="trend-indicator ${trendClass}">${arrow} ${percentLabel} ${descriptor}</span>
+                        <span class="trend-delta">${deltaLabel}</span>
+                    </td>`;
+                tbody.appendChild(row);
+            });
+        }
+
+        function wireScrollLinks() {
+            document.querySelectorAll("[data-scroll-target]").forEach((trigger) => {
+                trigger.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    const selector = trigger.getAttribute("data-scroll-target");
+                    const target = selector ? document.querySelector(selector) : null;
+                    if (target) {
+                        target.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }
+                });
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            buildChart();
+            populateStats();
+            buildTable();
+            wireScrollLinks();
+        });
+    </script>
+    <script src="../scripts/core/pages.js"></script>
+</body>
+
+</html>

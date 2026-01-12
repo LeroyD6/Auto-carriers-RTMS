@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Compare kilometers travelled against total CO₂ emissions across 2024 and 2025.">
+    <title>Distance vs CO₂ | KDG Logistics</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link href="../styles/dashboard.css" rel="stylesheet">
+</head>
+
+<body>
+    <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="home.html">KDG Logistics</a>
+        <div class="d-flex align-items-center gap-2 me-3">
+            <a class="btn btn-outline-light btn-sm" href="reports.html">Back to reports</a>
+            <a class="btn btn-danger btn-sm" href="../../public/pdf/Co2Reports/Consolidated CO2 emissions annual report.pdf" download>
+                Download 2024 report
+            </a>
+            <a class="btn btn-success btn-sm" href="../../public/pdf/Webfleet Co2/Consolidated CO2 emissions monthly report 2025.pdf"
+                download>
+                Download 2025 report
+            </a>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        <section class="page-hero">
+            <span class="badge">Carbon analytics</span>
+            <h1>Distance vs CO₂ emissions</h1>
+            <p>This dashboard overlays monthly kilometers travelled with CO₂ output so you can instantly see when
+                distance and emissions decouple. Use the comparison tools to pick up 2025 vs 2024 trends and capture
+                improvement actions.</p>
+            <div class="hero-actions">
+                <button class="btn btn-success" type="button" data-scroll-target="#trend-panel">View blended
+                    chart</button>
+                <button class="btn btn-outline-light" type="button" data-scroll-target="#data-panel">Jump to data
+                    table</button>
+            </div>
+        </section>
+
+        <section class="insights-grid" aria-label="Headline comparison">
+            <article class="stat-card">
+                <p class="stat-label">Total distance 2025</p>
+                <p class="stat-value" id="stat-distance">-- km</p>
+                <p class="stat-trend" id="stat-distance-delta">--</p>
+                <p class="stat-note">vs 2024 distance</p>
+            </article>
+            <article class="stat-card">
+                <p class="stat-label">Total CO₂ 2025</p>
+                <p class="stat-value" id="stat-emissions">-- kg</p>
+                <p class="stat-trend" id="stat-emissions-delta">--</p>
+                <p class="stat-note">vs 2024 emissions</p>
+            </article>
+            <article class="stat-card">
+                <p class="stat-label">CO₂ intensity</p>
+                <p class="stat-value" id="stat-intensity">-- kg/km</p>
+                <p class="stat-trend" id="stat-intensity-delta">--</p>
+                <p class="stat-note">Year-on-year change</p>
+            </article>
+        </section>
+
+        <section class="data-panel" id="trend-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Blended view</p>
+                    <h2>Kilometers vs CO₂ trend</h2>
+                    <p>Bars represent kilometers travelled, lines show total CO₂. Use the legend to hide/show any series
+                        and focus on a specific signal.</p>
+                </div>
+                <div class="panel-actions">
+                    <button class="btn btn-outline-light" type="button" id="toggle-2024">Toggle 2024</button>
+                    <button class="btn btn-outline-light" type="button" id="toggle-2025">Toggle 2025</button>
+                </div>
+            </div>
+            <div class="ratio-figures mb-3">
+                <small class="text-uppercase text-muted">Bar = kilometers | Line = CO₂</small>
+            </div>
+            <div class="chart-wrapper" style="height:420px">
+                <canvas id="comparisonChart" role="img" aria-label="Kilometers vs CO₂ comparison"></canvas>
+            </div>
+        </section>
+
+        <section class="data-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Efficiency signal</p>
+                    <h2>CO₂ intensity (kg/km)</h2>
+                    <p>Track how many kilograms of CO₂ are emitted per kilometer. Reversals highlight when operations
+                        lost efficiency even if kilometers stayed flat.</p>
+                </div>
+            </div>
+            <div class="chart-wrapper" style="height:320px">
+                <canvas id="intensityChart" role="img" aria-label="CO₂ intensity comparison"></canvas>
+            </div>
+        </section>
+
+        <section class="data-panel" id="data-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Supporting data</p>
+                    <h2>Monthly comparison table</h2>
+                    <p>Search a month to see the exact kilometer, emissions, and intensity deltas.</p>
+                </div>
+                <div class="table-controls">
+                    <input type="search" class="table-search" placeholder="Search month or value"
+                        data-table-filter="comparison-table">
+                </div>
+            </div>
+            <div class="doc-table-wrapper">
+                <table class="doc-table" id="comparison-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Month</th>
+                            <th scope="col">2024 km</th>
+                            <th scope="col">2025 km</th>
+                            <th scope="col">Δ km</th>
+                            <th scope="col">2024 CO₂ (kg)</th>
+                            <th scope="col">2025 CO₂ (kg)</th>
+                            <th scope="col">Δ CO₂ (kg)</th>
+                            <th scope="col">2024 kg/km</th>
+                            <th scope="col">2025 kg/km</th>
+                            <th scope="col">Δ kg/km</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <p class="table-caption">Δ values show 2025 minus 2024.</p>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"
+        integrity="sha384-gdQErvCNWvHQZj6XZM0dNsAoY4v+j5P1XDpNkcM3HJG1Yx04ecqIHk7+4VBOCHOG"
+        crossorigin="anonymous"></script>
+    <script>
+        const chartData = {
+            months: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+            kilometers: {
+                2024: [1068975.9, 1256177.0, 920507.2, 663129.4, 653517.9, 906898.3, 660308.0, 668576.3, 605350.7, 1431818.9, 1256834.6, 714816.8],
+                2025: [961680, 1125500, 1439095, 1089163, 1010268, 1015866, 1474840, 1395354, 1540339, 1620601, 1638273, 814895]
+            },
+            emissions: {
+                2024: [968928.5, 1130023, 816683, 618009.9, 606827.4, 861581.1, 620495.8, 635687, 576068, 1310736.6, 1193778.8, 690519.5],
+                2025: [900508.5, 1072075.9, 1392782.9, 1059320.4, 979158.3, 993335.1, 1474883.6, 1377606.3, 1491469.7, 1584296.9, 1596951.1, 755148.1]
+            }
+        };
+
+        const formatNumber = (value, options = {}) => new Intl.NumberFormat("en-ZA", options).format(value);
+
+        function sumSeries(series) {
+            return series.reduce((acc, value) => acc + value, 0);
+        }
+
+        function calcIntensity(year) {
+            return chartData.emissions[year].map((value, index) => value / chartData.kilometers[year][index]);
+        }
+
+        function buildComparisonChart() {
+            const ctx = document.getElementById("comparisonChart");
+            if (!ctx) return null;
+            return new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: chartData.months,
+                    datasets: [
+                        {
+                            label: "2024 km",
+                            data: chartData.kilometers[2024],
+                            backgroundColor: "rgba(247, 162, 82, 0.6)",
+                            borderRadius: 6,
+                            yAxisID: "yKm"
+                        },
+                        {
+                            label: "2025 km",
+                            data: chartData.kilometers[2025],
+                            backgroundColor: "rgba(15, 179, 108, 0.6)",
+                            borderRadius: 6,
+                            yAxisID: "yKm"
+                        },
+                        {
+                            type: "line",
+                            label: "2024 CO₂",
+                            data: chartData.emissions[2024],
+                            borderColor: "rgba(247, 162, 82, 1)",
+                            backgroundColor: "transparent",
+                            tension: 0.25,
+                            pointRadius: 4,
+                            pointBackgroundColor: "rgba(247, 162, 82, 1)",
+                            yAxisID: "yCo2"
+                        },
+                        {
+                            type: "line",
+                            label: "2025 CO₂",
+                            data: chartData.emissions[2025],
+                            borderColor: "rgba(147, 247, 202, 1)",
+                            backgroundColor: "transparent",
+                            tension: 0.25,
+                            pointRadius: 4,
+                            pointBackgroundColor: "rgba(147, 247, 202, 1)",
+                            yAxisID: "yCo2"
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { intersect: false, mode: "index" },
+                    plugins: {
+                        legend: {
+                            labels: { color: "#c8d5cf", font: { family: "Space Grotesk" } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    const value = context.parsed.y;
+                                    const suffix = context.dataset.label.includes("km") ? " km" : " kg";
+                                    return `${context.dataset.label}: ${formatNumber(value)}${suffix}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: "#9aa79f" },
+                            grid: { color: "rgba(255,255,255,0.04)" }
+                        },
+                        yKm: {
+                            position: "left",
+                            grid: { color: "rgba(255,255,255,0.04)" },
+                            ticks: {
+                                color: "#9aa79f",
+                                callback: (value) => `${formatNumber(value)} km`
+                            },
+                            title: {
+                                display: true,
+                                text: "Kilometers",
+                                color: "#c8d5cf"
+                            }
+                        },
+                        yCo2: {
+                            position: "right",
+                            grid: { drawOnChartArea: false },
+                            ticks: {
+                                color: "#9aa79f",
+                                callback: (value) => `${formatNumber(value)} kg`
+                            },
+                            title: {
+                                display: true,
+                                text: "CO₂ (kg)",
+                                color: "#c8d5cf"
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function buildIntensityChart(intensitySeries) {
+            const ctx = document.getElementById("intensityChart");
+            if (!ctx) return null;
+            return new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: chartData.months,
+                    datasets: [
+                        {
+                            label: "2024 kg/km",
+                            data: intensitySeries[2024],
+                            borderColor: "rgba(247, 162, 82, 1)",
+                            pointBackgroundColor: "rgba(247, 162, 82, 1)",
+                            tension: 0.25,
+                            fill: false
+                        },
+                        {
+                            label: "2025 kg/km",
+                            data: intensitySeries[2025],
+                            borderColor: "rgba(147, 247, 202, 1)",
+                            pointBackgroundColor: "rgba(147, 247, 202, 1)",
+                            tension: 0.25,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: "#c8d5cf", font: { family: "Space Grotesk" } }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: "#9aa79f" },
+                            grid: { color: "rgba(255,255,255,0.04)" }
+                        },
+                        y: {
+                            ticks: {
+                                color: "#9aa79f",
+                                callback: (value) => `${formatNumber(value, { maximumFractionDigits: 2 })} kg/km`
+                            },
+                            grid: { color: "rgba(255,255,255,0.08)" }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateStatCards(totals) {
+            const distanceDelta = totals.kilometers[2025] - totals.kilometers[2024];
+            const emissionsDelta = totals.emissions[2025] - totals.emissions[2024];
+            const intensityTotals = {
+                2024: totals.emissions[2024] / totals.kilometers[2024],
+                2025: totals.emissions[2025] / totals.kilometers[2025]
+            };
+            const intensityDelta = intensityTotals[2025] - intensityTotals[2024];
+            document.getElementById("stat-distance").textContent = `${formatNumber(totals.kilometers[2025])} km`;
+            document.getElementById("stat-distance-delta").textContent = `${distanceDelta >= 0 ? "+" : ""}${formatNumber(distanceDelta)} km vs 2024`;
+            document.getElementById("stat-emissions").textContent = `${formatNumber(totals.emissions[2025])} kg`;
+            document.getElementById("stat-emissions-delta").textContent = `${emissionsDelta >= 0 ? "+" : ""}${formatNumber(emissionsDelta)} kg vs 2024`;
+            document.getElementById("stat-intensity").textContent = `${formatNumber(intensityTotals[2025], { maximumFractionDigits: 2 })} kg/km`;
+            document.getElementById("stat-intensity-delta").textContent = `${intensityDelta >= 0 ? "+" : ""}${formatNumber(intensityDelta, { maximumFractionDigits: 2 })} kg/km vs 2024`;
+        }
+
+        function buildTable(intensitySeries) {
+            const tbody = document.querySelector("#comparison-table tbody");
+            if (!tbody) return;
+            tbody.innerHTML = "";
+            chartData.months.forEach((month, index) => {
+                const km24 = chartData.kilometers[2024][index];
+                const km25 = chartData.kilometers[2025][index];
+                const co224 = chartData.emissions[2024][index];
+                const co225 = chartData.emissions[2025][index];
+                const int24 = intensitySeries[2024][index];
+                const int25 = intensitySeries[2025][index];
+                const intDelta = int25 - int24;
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${month}</td>
+                    <td>${formatNumber(km24)}</td>
+                    <td>${formatNumber(km25)}</td>
+                    <td class="${km25 - km24 >= 0 ? "variance-positive" : "variance-negative"}">${km25 - km24 >= 0 ? "+" : ""}${formatNumber(km25 - km24)}</td>
+                    <td>${formatNumber(co224)}</td>
+                    <td>${formatNumber(co225)}</td>
+                    <td class="${co225 - co224 >= 0 ? "variance-positive" : "variance-negative"}">${co225 - co224 >= 0 ? "+" : ""}${formatNumber(co225 - co224)}</td>
+                    <td>${formatNumber(int24, { maximumFractionDigits: 2 })}</td>
+                    <td>${formatNumber(int25, { maximumFractionDigits: 2 })}</td>
+                    <td class="${intDelta > 0 ? "variance-positive" : intDelta < 0 ? "variance-negative" : ""}">${intDelta > 0 ? "+" : ""}${formatNumber(intDelta, { maximumFractionDigits: 2 })}</td>`;
+                tbody.appendChild(row);
+            });
+        }
+
+        function wireToggleButtons(chartInstance) {
+            const toggleYear = (year) => {
+                chartInstance.data.datasets.forEach((dataset) => {
+                    if (dataset.label.includes(year.toString())) {
+                        dataset.hidden = !dataset.hidden;
+                    }
+                });
+                chartInstance.update();
+            };
+            document.getElementById("toggle-2024").addEventListener("click", () => toggleYear(2024));
+            document.getElementById("toggle-2025").addEventListener("click", () => toggleYear(2025));
+        }
+
+        function wireDownloadCsv(intensitySeries) {
+            const button = document.getElementById("downloadCsv");
+            if (!button) return;
+            button.addEventListener("click", () => {
+                const header = ["Month", "2024 km", "2025 km", "2024 CO2", "2025 CO2", "2024 kg/km", "2025 kg/km"];
+                const rows = chartData.months.map((month, index) => [
+                    month,
+                    chartData.kilometers[2024][index],
+                    chartData.kilometers[2025][index],
+                    chartData.emissions[2024][index],
+                    chartData.emissions[2025][index],
+                    intensitySeries[2024][index].toFixed(3),
+                    intensitySeries[2025][index].toFixed(3)
+                ]);
+                const csvContent = [header, ...rows].map((row) => row.join(",")).join("\n");
+                const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = "distance-vs-co2.csv";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            });
+        }
+
+        function wireScrollLinks() {
+            document.querySelectorAll("[data-scroll-target]").forEach((trigger) => {
+                trigger.addEventListener("click", (event) => {
+                    event.preventDefault();
+                    const targetSelector = trigger.getAttribute("data-scroll-target");
+                    const target = targetSelector ? document.querySelector(targetSelector) : null;
+                    if (target) {
+                        target.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }
+                });
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const intensitySeries = {
+                2024: calcIntensity(2024),
+                2025: calcIntensity(2025)
+            };
+            const totals = {
+                kilometers: {
+                    2024: sumSeries(chartData.kilometers[2024]),
+                    2025: sumSeries(chartData.kilometers[2025])
+                },
+                emissions: {
+                    2024: sumSeries(chartData.emissions[2024]),
+                    2025: sumSeries(chartData.emissions[2025])
+                }
+            };
+            const comparisonChart = buildComparisonChart();
+            buildIntensityChart(intensitySeries);
+            updateStatCards(totals);
+            buildTable(intensitySeries);
+            wireToggleButtons(comparisonChart);
+            wireDownloadCsv(intensitySeries);
+            wireScrollLinks();
+        });
+    </script>
+    <script src="../scripts/core/pages.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="auto">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Access the ISO 14001 control tower and evidence packs.">
+    <title>Control Tower Sign in</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link href="../styles/Signin.css" rel="stylesheet">
+</head>
+
+<body class="auth-body" data-page="login">
+    <main class="auth-shell">
+        <section class="auth-copy">
+            <span class="badge">KDG logistics</span>
+            <h1>ISO 14001 control tower</h1>
+            <p>Sign in to view carbon dashboards, waste logs, SOPs, corrective actions, and audit-ready evidence in one
+                cockpit.</p>
+            <ul class="auth-highlights">
+                <li>Encrypted access to live dashboards</li>
+                <li>Linked procedures and registers</li>
+                <li>Downloadable evidence packs</li>
+            </ul>
+        </section>
+        <section class="auth-card" aria-label="Sign in panel">
+            <form class="form-signin" aria-describedby="signin-footnote" data-login-form>
+                <img class="auth-logo" src="../../public/images/kdg logo small.png" alt="KDG Logistics logo" width="280"
+                    height="92">
+                <h2>Welcome back</h2>
+                <p class="auth-subtitle">Use your control tower credentials to continue.</p>
+                <p class="auth-error" role="alert" aria-live="polite" hidden data-login-error>
+                    Invalid credentials. Use the issued email and password.
+                </p>
+
+                <div class="form-floating">
+                    <input type="email" class="form-control" id="floatingInput" placeholder="leroy@kdglogistics.com"
+                        autocomplete="username" required>
+                    <label for="floatingInput">Email</label>
+                </div>
+                <div class="form-floating">
+                    <input type="password" class="form-control" id="floatingPassword" placeholder="Password"
+                        autocomplete="current-password" required>
+                    <label for="floatingPassword">Password</label>
+                </div>
+
+                <div class="form-check text-start my-3">
+                    <input class="form-check-input" type="checkbox" value="remember-me" id="flexCheckDefault">
+                    <label class="form-check-label" for="flexCheckDefault">
+                        Remember me on this device
+                    </label>
+                </div>
+
+                <button class="btn btn-success w-100 py-2 auth-submit" type="submit">Sign in</button>
+                <p class="auth-meta" id="signin-footnote">Access restricted to authorised KDG EMS personnel.</p>
+            </form>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+    <script src="../scripts/core/auth.js"></script>
+</body>
+
+</html>
