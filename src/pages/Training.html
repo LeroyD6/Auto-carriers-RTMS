@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="RTMS training register with searchable driver matrix.">
+    <title>Training Register | Auto Carriers RTMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link href="../styles/dashboard.css" rel="stylesheet">
+    <style>
+        .training-shell {
+            max-width: 100%;
+            padding-left: clamp(0.6rem, 2vw, 1.5rem);
+            padding-right: clamp(0.6rem, 2vw, 1.5rem);
+        }
+
+        .training-table-wrapper {
+            overflow: auto;
+            max-height: 70vh;
+        }
+
+        .training-table th,
+        .training-table td {
+            min-width: 170px;
+            white-space: normal;
+            vertical-align: top;
+        }
+
+        .training-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: rgba(10, 15, 75, 0.98);
+        }
+
+        .training-table th:first-child,
+        .training-table td:first-child {
+            min-width: 130px;
+            position: sticky;
+            left: 0;
+            z-index: 1;
+            background: rgba(10, 15, 75, 0.95);
+        }
+
+        .training-table thead th:first-child {
+            z-index: 3;
+        }
+
+        .summary-note {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-top: 0.8rem;
+        }
+
+        .training-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .training-controls .table-search,
+        .training-controls .form-select {
+            min-width: 240px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            color: #fff;
+        }
+
+        .training-controls .form-select option {
+            color: #000;
+        }
+
+        .scroll-hint {
+            color: var(--muted);
+            font-size: 0.82rem;
+            margin-top: 0.45rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white d-flex align-items-center" href="home.html">
+            Auto Carriers
+        </a>
+        <img src="../../public/images/Auto carriers  logo.jpg"
+            onerror="this.onerror=null;this.src='../../public/images/Auto%20carriers%20%20logo.jpg';"
+            class="brand-mark rounded mx-auto d-block" alt="Auto Carriers logo">
+
+        <div class="d-flex align-items-center gap-2 me-3">
+            <a class="btn btn-outline-light btn-sm" href="home.html">Back to control tower</a>
+        </div>
+    </header>
+
+    <main class="page-shell training-shell">
+        <section class="page-hero">
+            <span class="badge">RTMS Training Register</span>
+            <h1>Driver training monitoring</h1>
+            <div class="hero-actions">
+                <a class="btn btn-outline-light" href="../../public/data/Auto Carriers Drivers Metrix 2026.xlsx"
+                    download>
+                    Driver Metrix
+                </a>
+            </div>
+        </section>
+
+        <section class="insights-grid" aria-label="Training register summary">
+            <article class="stat-card text-center">
+                <p class="stat-label">Total drivers</p>
+                <p class="stat-value" id="stat-total-drivers">--</p>
+                <p class="stat-note">Rows loaded from register</p>
+            </article>
+            <article class="stat-card text-center">
+                <p class="stat-label">Long-haul drivers</p>
+                <p class="stat-value" id="stat-long-haul">--</p>
+                <p class="stat-note">Long-haul division</p>
+            </article>
+            <article class="stat-card text-center">
+                <p class="stat-label">Local drivers</p>
+                <p class="stat-value" id="stat-local">--</p>
+                <p class="stat-note">Local division</p>
+            </article>
+        </section>
+
+        <section class="data-panel" id="training-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Training matrix</p>
+                    <h2>Training register by driver</h2>
+                    <p>Search by employee number, driver name, ID number, or division.</p>
+                </div>
+                <div class="training-controls">
+                    <input type="search" id="training-search" class="table-search"
+                        placeholder="Search employee, name, ID, or division">
+                    <select id="training-filter" class="form-select" aria-label="Training row filter">
+                        <option value="all">All divisions</option>
+                        <option value="Long-haul">Long-haul</option>
+                        <option value="Local">Local</option>
+                    </select>
+                    <select id="training-sort" class="form-select" aria-label="Sort training rows">
+                        <option value="nextTrainingDate">Sort: Next Training Date</option>
+                        <option value="prdpExpiry">Sort: PRDP Expiry</option>
+                        <option value="licenceExpiry">Sort: Licence Expiry</option>
+                        <option value="name">Sort: Driver Name</option>
+                        <option value="title">Sort: Title</option>
+                    </select>
+                    <select id="training-sort-direction" class="form-select" aria-label="Sort direction">
+                        <option value="asc">Ascending</option>
+                        <option value="desc">Descending</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="training-table-wrapper doc-table-wrapper">
+                <table class="doc-table training-table" id="training-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Driver Name</th>
+                            <th scope="col">Title</th>
+                            <th scope="col">ID Number</th>
+                            <th scope="col">PRDP Expiry</th>
+                            <th scope="col">Licence Expiry</th>
+                            <th scope="col">Annual Medical</th>
+                            <th scope="col">Next Annual Medical</th>
+                            <th scope="col">Next Training Date</th>
+                            <th scope="col">Division</th>
+                            <th scope="col">Training Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="training-table-body"></tbody>
+                </table>
+            </div>
+            <p class="scroll-hint">Tip: Scroll horizontally to view all columns. The first column and header stay fixed.
+            </p>
+            <p class="summary-note" id="training-summary-note">Loading training register...</p>
+            <p class="summary-note d-none" id="training-debug-note"></p>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+    <script src="../scripts/core/pages.js"></script>
+    <script>
+        const trainingDataPath = "../../public/data/Driver metrix.csv";
+
+        const state = {
+            rows: [],
+            activeDivision: "all",
+            searchQuery: "",
+            sortKey: "nextTrainingDate",
+            sortDirection: "asc",
+            nextTrainingDateColumnCount: 0
+        };
+
+        function normalizeText(value) {
+            return String(value || "").trim().toLowerCase();
+        }
+
+        function parseCsvLine(line) {
+            const cells = [];
+            let current = "";
+            let inQuotes = false;
+
+            for (let index = 0; index < line.length; index += 1) {
+                const character = line[index];
+                const nextCharacter = line[index + 1];
+
+                if (character === '"') {
+                    if (inQuotes && nextCharacter === '"') {
+                        current += '"';
+                        index += 1;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                    continue;
+                }
+
+                if (character === "," && !inQuotes) {
+                    cells.push(current.trim());
+                    current = "";
+                    continue;
+                }
+
+                current += character;
+            }
+
+            cells.push(current.trim());
+            return cells;
+        }
+
+        function csvToRows(csvText) {
+            return csvText
+                .split(/\r?\n/)
+                .filter((line) => line.trim().length > 0)
+                .map((line) => parseCsvLine(line));
+        }
+
+        function findHeaderIndex(headerRow, expectedHeader) {
+            return headerRow.findIndex((column) => normalizeText(column) === normalizeText(expectedHeader));
+        }
+
+        function findHeaderIndexes(headerRow, expectedHeader) {
+            const target = normalizeText(expectedHeader);
+            const indexes = [];
+
+            headerRow.forEach((column, index) => {
+                if (normalizeText(column) === target) {
+                    indexes.push(index);
+                }
+            });
+
+            return indexes;
+        }
+
+        function parseDateValue(rawValue) {
+            const value = String(rawValue || "").trim();
+            if (!value || /^applied$/i.test(value)) return null;
+
+            const dateMatch = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+            const compactDateMatch = value.match(/^(\d{1,2})\/(\d{2})(\d{4})$/);
+
+            let day;
+            let month;
+            let year;
+
+            if (dateMatch) {
+                day = Number(dateMatch[1]);
+                month = Number(dateMatch[2]);
+                year = Number(dateMatch[3]);
+            } else if (compactDateMatch) {
+                day = Number(compactDateMatch[1]);
+                month = Number(compactDateMatch[2]);
+                year = Number(compactDateMatch[3]);
+            } else {
+                return null;
+            }
+
+            if (year < 100) year += 2000;
+
+            const parsed = new Date(year, month - 1, day);
+            if (Number.isNaN(parsed.getTime())) return null;
+
+            parsed.setHours(0, 0, 0, 0);
+            return parsed;
+        }
+
+        function pickNextTrainingDate(row, nextTrainingDateIndexes) {
+            if (!nextTrainingDateIndexes.length) return "N/A";
+
+            const rawValues = nextTrainingDateIndexes
+                .map((columnIndex) => String(row[columnIndex] || "").trim())
+                .filter((value) => value.length > 0 && !/^n\/a$/i.test(value));
+
+            if (!rawValues.length) return "N/A";
+
+            const parsedCandidates = rawValues
+                .map((rawValue) => ({ rawValue, parsedDate: parseDateValue(rawValue) }))
+                .filter((candidate) => candidate.parsedDate);
+
+            if (!parsedCandidates.length) {
+                return rawValues[0];
+            }
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const futureCandidates = parsedCandidates
+                .filter((candidate) => candidate.parsedDate.getTime() >= today.getTime())
+                .sort((left, right) => left.parsedDate.getTime() - right.parsedDate.getTime());
+
+            if (futureCandidates.length) {
+                return futureCandidates[0].rawValue;
+            }
+
+            const pastCandidates = parsedCandidates.sort((left, right) => right.parsedDate.getTime() - left.parsedDate.getTime());
+            return pastCandidates[0].rawValue;
+        }
+
+        function resolveDivision(title) {
+            const cleanTitle = normalizeText(title);
+            if (cleanTitle.includes("local")) return "Local";
+            return "Long-haul";
+        }
+
+        function resolveTrainingStatus(nextTrainingDate) {
+            const parsedDate = parseDateValue(nextTrainingDate);
+            if (!nextTrainingDate) {
+                return {
+                    text: "No date",
+                    badgeClass: "text-bg-secondary"
+                };
+            }
+
+            if (!parsedDate) {
+                return {
+                    text: nextTrainingDate,
+                    badgeClass: "text-bg-secondary"
+                };
+            }
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const days = Math.floor((parsedDate.getTime() - today.getTime()) / 86400000);
+            if (days < 0) {
+                return {
+                    text: `${Math.abs(days)} day${Math.abs(days) === 1 ? "" : "s"} overdue`,
+                    badgeClass: "text-bg-danger"
+                };
+            }
+
+            if (days <= 30) {
+                return {
+                    text: `${days} day${days === 1 ? "" : "s"} left`,
+                    badgeClass: "text-bg-warning"
+                };
+            }
+
+            return {
+                text: `${days} day${days === 1 ? "" : "s"} left`,
+                badgeClass: "text-bg-success"
+            };
+        }
+
+        function mapDriversFromCsv(csvRows) {
+            if (!csvRows.length) return [];
+
+            const headerRow = csvRows[0];
+            const nameIndex = findHeaderIndex(headerRow, "Name");
+            const surnameIndex = findHeaderIndex(headerRow, "Surname");
+            const titleIndex = findHeaderIndex(headerRow, "Title");
+            const idIndex = findHeaderIndex(headerRow, "ID");
+            const prdpIndex = findHeaderIndex(headerRow, "PRDP EXP");
+            const licenceIndex = findHeaderIndex(headerRow, "LICENCE EXP");
+            const annualMedicalIndex = findHeaderIndex(headerRow, "ANNUAL MEDICAL");
+            const nextAnnualMedicalIndex = findHeaderIndex(headerRow, "Next Annual Medical");
+            const nextTrainingDateIndexes = findHeaderIndexes(headerRow, "Next Training Date");
+            state.nextTrainingDateColumnCount = nextTrainingDateIndexes.length;
+
+            if (nameIndex < 0 || surnameIndex < 0 || titleIndex < 0 || idIndex < 0) {
+                throw new Error("Driver metrix.csv is missing one or more required columns: Name, Surname, Title, ID.");
+            }
+
+            const records = [];
+
+            for (let index = 1; index < csvRows.length; index += 1) {
+                const row = csvRows[index];
+                const name = String(row[nameIndex] || "").trim();
+                const surname = String(row[surnameIndex] || "").trim();
+                const title = String(row[titleIndex] || "").trim();
+                const idNumber = String(row[idIndex] || "").trim();
+
+                if (!name && !surname && !title && !idNumber) {
+                    continue;
+                }
+
+                const fullName = `${name} ${surname}`.trim() || "N/A";
+                const nextTrainingDate = pickNextTrainingDate(row, nextTrainingDateIndexes);
+                const trainingStatus = resolveTrainingStatus(nextTrainingDate);
+
+                records.push({
+                    name: fullName,
+                    title: title || "N/A",
+                    idNumber: idNumber || "N/A",
+                    prdpExpiry: prdpIndex >= 0 ? String(row[prdpIndex] || "").trim() || "N/A" : "N/A",
+                    licenceExpiry: licenceIndex >= 0 ? String(row[licenceIndex] || "").trim() || "N/A" : "N/A",
+                    annualMedical: annualMedicalIndex >= 0 ? String(row[annualMedicalIndex] || "").trim() || "N/A" : "N/A",
+                    nextAnnualMedical: nextAnnualMedicalIndex >= 0 ? String(row[nextAnnualMedicalIndex] || "").trim() || "N/A" : "N/A",
+                    nextTrainingDate: nextTrainingDate || "N/A",
+                    division: resolveDivision(title),
+                    trainingStatus
+                });
+            }
+
+            return records;
+        }
+
+        function rowMatchesSearch(row) {
+            const query = state.searchQuery;
+            if (!query) return true;
+            const combined = `${row.name} ${row.title} ${row.idNumber} ${row.prdpExpiry} ${row.licenceExpiry} ${row.annualMedical} ${row.nextAnnualMedical} ${row.nextTrainingDate} ${row.division} ${row.trainingStatus.text}`;
+            return normalizeText(combined).includes(query);
+        }
+
+        function rowMatchesFilter(row) {
+            if (state.activeDivision === "all") return true;
+            return row.division === state.activeDivision;
+        }
+
+        function getSortValue(row, sortKey) {
+            if (sortKey === "nextTrainingDate" || sortKey === "prdpExpiry" || sortKey === "licenceExpiry") {
+                const parsedDate = parseDateValue(row[sortKey]);
+                return parsedDate ? parsedDate.getTime() : Number.POSITIVE_INFINITY;
+            }
+
+            return normalizeText(row[sortKey]);
+        }
+
+        function sortRows(rows) {
+            const directionFactor = state.sortDirection === "desc" ? -1 : 1;
+            const sortKey = state.sortKey;
+
+            return [...rows].sort((leftRow, rightRow) => {
+                const leftValue = getSortValue(leftRow, sortKey);
+                const rightValue = getSortValue(rightRow, sortKey);
+
+                if (typeof leftValue === "number" && typeof rightValue === "number") {
+                    return (leftValue - rightValue) * directionFactor;
+                }
+
+                return String(leftValue).localeCompare(String(rightValue)) * directionFactor;
+            });
+        }
+
+        function updateStats() {
+            const longHaul = state.rows.filter((row) => row.division === "Long-haul").length;
+            const local = state.rows.filter((row) => row.division === "Local").length;
+
+            document.getElementById("stat-total-drivers").textContent = state.rows.length;
+            document.getElementById("stat-long-haul").textContent = longHaul;
+            document.getElementById("stat-local").textContent = local;
+        }
+
+        function isDebugEnabled() {
+            const params = new URLSearchParams(window.location.search);
+            const value = params.get("debugTraining");
+            return value === "1" || normalizeText(value) === "true";
+        }
+
+        function updateDebugNote() {
+            const debugNote = document.getElementById("training-debug-note");
+            if (!debugNote) return;
+
+            if (!isDebugEnabled()) {
+                debugNote.classList.add("d-none");
+                return;
+            }
+
+            debugNote.textContent = `Debug: detected ${state.nextTrainingDateColumnCount} \"Next Training Date\" column(s) in Driver metrix.csv.`;
+            debugNote.classList.remove("d-none");
+        }
+
+        function renderTable() {
+            const body = document.getElementById("training-table-body");
+            const note = document.getElementById("training-summary-note");
+            body.innerHTML = "";
+
+            const filteredRows = state.rows.filter((row) => rowMatchesFilter(row) && rowMatchesSearch(row));
+            const visibleRows = sortRows(filteredRows);
+
+            if (!visibleRows.length) {
+                body.innerHTML = '<tr><td colspan="10" class="muted">No matching training records found.</td></tr>';
+                note.textContent = "No records match the current filters.";
+                return;
+            }
+
+            visibleRows.forEach((row) => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td><strong>${row.name}</strong></td>
+                    <td>${row.title}</td>
+                    <td>${row.idNumber}</td>
+                    <td>${row.prdpExpiry}</td>
+                    <td>${row.licenceExpiry}</td>
+                    <td>${row.annualMedical}</td>
+                    <td>${row.nextAnnualMedical}</td>
+                    <td>${row.nextTrainingDate}</td>
+                    <td>${row.division}</td>
+                    <td><span class="badge ${row.trainingStatus.badgeClass}">${row.trainingStatus.text}</span></td>
+				`;
+                body.appendChild(tr);
+            });
+
+            note.textContent = `Showing ${visibleRows.length} of ${state.rows.length} driver records.`;
+        }
+
+        async function loadTrainingRegister() {
+            const note = document.getElementById("training-summary-note");
+
+            try {
+                const response = await fetch(trainingDataPath, { cache: "no-store" });
+                if (!response.ok) {
+                    throw new Error(`Unable to load training register (${response.status})`);
+                }
+
+                const csvText = await response.text();
+                const csvRows = csvToRows(csvText);
+                state.rows = mapDriversFromCsv(csvRows);
+                updateStats();
+                updateDebugNote();
+                renderTable();
+            } catch (error) {
+                console.error(error);
+                note.textContent = "Unable to load training data. Please verify Driver metrix.csv in public/data.";
+            }
+        }
+
+        function applyFilters() {
+            state.searchQuery = normalizeText(document.getElementById("training-search")?.value);
+            state.activeDivision = document.getElementById("training-filter")?.value || "all";
+            state.sortKey = document.getElementById("training-sort")?.value || "nextTrainingDate";
+            state.sortDirection = document.getElementById("training-sort-direction")?.value || "asc";
+            renderTable();
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("training-search")?.addEventListener("input", applyFilters);
+            document.getElementById("training-filter")?.addEventListener("change", applyFilters);
+            document.getElementById("training-sort")?.addEventListener("change", applyFilters);
+            document.getElementById("training-sort-direction")?.addEventListener("change", applyFilters);
+            document.getElementById("refresh-training")?.addEventListener("click", loadTrainingRegister);
+            loadTrainingRegister();
+        });
+    </script>
+</body>
+
+</html>
