@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vehicle Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+    <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white d-flex align-items-center"
+            href="FleetInventory.html">
+            Auto Carriers
+        </a>
+        <img src="../../public/images/Auto carriers  logo.jpg"
+            onerror="this.onerror=null;this.src='../../public/images/Auto%20carriers%20%20logo.jpg';"
+            class="brand-mark rounded mx-auto d-block" alt="Auto Carriers logo">
+
+        <img src="kdg logo small.png" class="logo rounded mx-auto d-block" alt="KDG Logo">
+    </header>
+    <div class="container py-4">
+        <h1 class="h3" id="vehicle-title">Vehicle</h1>
+        <div id="status-alert"></div>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <h5>Horse</h5>
+                <table class="table table-sm table-striped" id="horse-table"></table>
+            </div>
+            <div class="col-md-6">
+                <h5>Trailer</h5>
+                <table class="table table-sm table-striped" id="trailer-table"></table>
+            </div>
+        </div>
+        <p class="text-muted small mt-3" id="source-note"></p>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"
+        integrity="sha512-vtR6dJ0D5FvNG0z8Iky3Uczdlz7YT1DoP70uQgmO6ijLJrVN6a8GN28AL/fOHnqd7qV3CyMfCVxYvBy06A0IXA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="../../assets/js/csv-utils.js"></script>
+    <script>
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            const fleetId = params.get('fleetId');
+            const csvPath = 'FL.csv';
+            if (!fleetId) {
+                document.getElementById('status-alert').innerHTML = '<div class="alert alert-warning">No fleetId specified.</div>';
+                return;
+            }
+            RTMSCSV.parseCSV(csvPath, { header: true }).then(data => {
+                const match = data.find(r => r.FleetID === fleetId);
+                if (!match) {
+                    document.getElementById('status-alert').innerHTML = '<div class="alert alert-danger">No vehicle found for fleetId ' + fleetId + '.</div>';
+                    return;
+                }
+                document.getElementById('vehicle-title').textContent = 'Fleet ' + fleetId;
+                buildTable('horse-table', {
+                    'HORSE FLEET': match.Horse,
+                    'HORSE REGISTRATION': link(match.HorseRegistrationLink, match.HorseRegistration),
+                    'HORSE YEAR MODEL': match.HorseYearModel,
+                    'HORSE MAKE': match.HorseMake,
+                    'ENGINE NUMBER': match.EngineNumber,
+                    'HORSE CHASSIS': link(match.HorseChassisLink, match.HorseChassis),
+                    'HORSE GVM': link(match.HorseGVMLink, match.HorseGVM),
+                    'HORSE TARE': match.HorseTare,
+                    'NUMBER OF AXLES': match.HorseAxles,
+                    'STATUS': match.HorseStatus
+                });
+                buildTable('trailer-table', {
+                    'TRAILER FLEET': match.TrailerFleet,
+                    'TRAILER REGISTRATION': link(match.TrailerRegistrationLink, match.TrailerRegistration),
+                    'TRAILER YEAR MODEL': match.TrailerYearModel,
+                    'TRAILER MAKE': match.TrailerMake,
+                    'TRAILER MODEL': match.TrailerModel,
+                    'TRAILER CHASSIS': link(match.TrailerChassisLink, match.TrailerChassis),
+                    'TRAILER GVM': link(match.TrailerGVMLink, match.TrailerGVM),
+                    'TRAILER TARE': match.TrailerTare,
+                    'NUMBER OF AXLES': match.TrailerAxles,
+                    'STATUS': match.TrailerStatus
+                });
+                document.getElementById('source-note').textContent = 'Data source: ' + csvPath;
+            }).catch(err => {
+                document.getElementById('status-alert').innerHTML = '<div class="alert alert-danger">Failed to load CSV.</div>';
+                console.error(err);
+            });
+
+            function buildTable(id, obj) {
+                const table = document.getElementById(id);
+                table.innerHTML = '';
+                const tbody = document.createElement('tbody');
+                Object.entries(obj).forEach(([k, v]) => {
+                    const tr = document.createElement('tr');
+                    const th = document.createElement('th');
+                    th.scope = 'row';
+                    th.textContent = k;
+                    const td = document.createElement('td');
+                    td.innerHTML = v == null || v === '' ? '<span class="text-muted">N/A</span>' : v;
+                    tr.appendChild(th); tr.appendChild(td); tbody.appendChild(tr);
+                });
+                table.appendChild(tbody);
+            }
+            function link(href, text) {
+                if (!href) return text || '';
+                return '<a href="' + href + '" target="_blank">' + (text || 'Open') + '</a>';
+            }
+        })();
+    </script>
+</body>
+
+</html>

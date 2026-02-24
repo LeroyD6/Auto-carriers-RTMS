@@ -1,64 +1,81 @@
 body {
-	font-family: "Arial", sans-serif;
-	background-color: #f4f4f4;
+  font-family: "Arial", sans-serif;
+  background-color: #010065;
+  background-image:
+    radial-gradient(circle at 14% 12%, rgba(255, 255, 255, 0.18), transparent 35%),
+    radial-gradient(circle at 88% 4%, rgba(235, 50, 54, 0.24), transparent 26%);
 }
 
 .navbar {
-	background-color: #333;
+  background: rgba(1, 0, 101, 0.45);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.24);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
 }
 
 .parent {
-	margin-top: 10px;
-	margin-bottom: 50px;
-	background-color: #028c44;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	padding: 20px !important;
-	margin-bottom: 20px !important;
+  margin-top: 10px;
+  margin-bottom: 50px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 18px;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px !important;
+  margin-bottom: 20px !important;
 }
 
 h1 {
-	color: #111010;
+  color: #ffffff;
 }
 
 table {
-	box-shadow: 0 4px px rgba(0, 0, 0, 0.1) !important;
-	width: 80% !important;
-	margin: 0 auto;
-	border-collapse: collapse;
-	margin-bottom: 20px;
-	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 4px px rgba(0, 0, 0, 0.1) !important;
+  width: 80% !important;
+  margin: 0 auto;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  box-shadow: 0 15px 30px rgba(1, 0, 101, 0.35) !important;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 14px;
+  overflow: hidden;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
 }
 
 th,
 td {
-	padding: 10px;
-	border: 1.5px solid #a79f9f;
-	text-align: center;
+  padding: 10px;
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
+  text-align: center;
 }
 
 th {
-	background-color: #9a9c9c !important;
-	color: #333 !important;
-	font-weight: bold;
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+  font-weight: bold;
 }
 
 td {
-	background-color: #171ad1;
+  background-color: rgba(1, 0, 101, 0.22);
+  color: #ffffff;
 }
 
 a {
-	color: #6d756c;
-	text-decoration: none;
-	font-weight: bold;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: bold;
 }
 
 a:hover {
-	text-decoration: underline !important;
-	color: #028c44 !important;
+  text-decoration: underline !important;
+  color: #eb3236 !important;
 }
 img {
-	width: 100px;
-	height: 50px;
+  width: 100px;
+  height: 50px;
 }

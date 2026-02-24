@@ -1,15 +1,15 @@
 @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Work+Sans:wght@400;500;600&display=swap");
 
 :root {
-  --night: #030c08;
-  --forest: #052c20;
-  --leaf: #0fb36c;
-  --leaf-dark: #0a8d52;
-  --mint: #93f7ca;
-  --stone: #c8d5cf;
-  --card: rgba(8, 32, 24, 0.95);
-  --card-border: rgba(255, 255, 255, 0.08);
-  --muted: rgba(255, 255, 255, 0.6);
+  --night: #010065;
+  --forest: #010065;
+  --leaf: #eb3236;
+  --leaf-dark: #eb3236;
+  --mint: #ffffff;
+  --stone: #ffffff;
+  --card: rgba(1, 0, 101, 0.4);
+  --card-border: rgba(255, 255, 255, 0.28);
+  --muted: rgba(132, 133, 135, 0.95);
   --font-display: "Space Grotesk", sans-serif;
   --font-body: "Work Sans", sans-serif;
 }
@@ -28,9 +28,10 @@ body {
   min-height: 100vh;
   margin: 0;
   background-color: var(--night);
-  background-image: radial-gradient(circle at 15% 20%, rgba(147, 247, 202, 0.15), transparent 45%),
-    radial-gradient(circle at 80% 0%, rgba(15, 179, 108, 0.15), transparent 35%),
-    linear-gradient(120deg, #02130c, #041f16 60%, #03130b);
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.2), transparent 45%),
+    radial-gradient(circle at 80% 0%, rgba(235, 50, 54, 0.3), transparent 35%),
+    linear-gradient(120deg, #010065, rgba(1, 0, 101, 0.88) 58%, #010065);
   color: var(--stone);
   display: flex;
   align-items: center;
@@ -47,8 +48,8 @@ body {
 }
 
 .auth-copy .badge {
-  background: rgba(147, 247, 202, 0.15);
-  border: 1px solid rgba(147, 247, 202, 0.4);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   color: var(--mint);
   padding: 0.35rem 0.85rem;
   border-radius: 999px;
@@ -95,7 +96,9 @@ body {
   border: 1px solid var(--card-border);
   border-radius: 1.5rem;
   padding: clamp(1.75rem, 4vw, 2.5rem);
-  box-shadow: 0 30px 50px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 24px 40px rgba(1, 0, 101, 0.35);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
 }
 
 .form-signin {
@@ -109,6 +112,8 @@ body {
 .auth-logo {
   display: block;
   margin: 0 auto 0.75rem;
+  width: min(300px, 100%);
+  height: auto;
 }
 
 .auth-card h2 {
@@ -124,26 +129,32 @@ body {
 
 .auth-error {
   text-align: center;
-  color: #ff9f80;
+  color: #ffffff;
+  background: rgba(235, 50, 54, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 0.75rem;
+  padding: 0.45rem 0.6rem;
   font-weight: 600;
   margin-bottom: 0.75rem;
 }
 
 .form-floating .form-control {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.32);
   color: var(--stone);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 
 .form-floating label {
-  color: var(--muted);
+  color: #ffffff;
 }
 
 .form-control:focus {
-  border-color: var(--mint);
-  box-shadow: 0 0 0 0.25rem rgba(15, 179, 108, 0.2);
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
+  border-color: #eb3236;
+  box-shadow: 0 0 0 0.25rem rgba(235, 50, 54, 0.24);
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
 }
 
 .form-check-label {
@@ -156,14 +167,16 @@ body {
 }
 
 .btn-success {
-  background: linear-gradient(120deg, var(--leaf), var(--leaf-dark));
+  background: linear-gradient(120deg, #eb3236, rgba(235, 50, 54, 0.84));
   border: none;
+  color: #ffffff;
   font-weight: 600;
   letter-spacing: 0.04em;
+  box-shadow: 0 10px 22px rgba(235, 50, 54, 0.32);
 }
 
 .btn-success:hover {
-  background: linear-gradient(120deg, var(--leaf-dark), var(--leaf));
+  background: linear-gradient(120deg, rgba(235, 50, 54, 0.84), #eb3236);
 }
 
 .auth-meta {

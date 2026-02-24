@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Live ISO 14001 environmental management dashboard for KDG Logistics.">
+    <meta name="description" content="Live ISO 14001 and RTMS environmental dashboard for Auto Carriers.">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <link href="../styles/dashboard.css" rel="stylesheet">
@@ -13,8 +13,12 @@
 
 <body data-requires-auth="true">
     <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
-        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white" href="#">KDG logistics </a>
-        <img src="../../public/images/kdg logo small.png" class="brand-mark rounded mx-auto d-block" alt="">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white d-flex align-items-center" href="#">
+            Auto Carriers
+        </a>
+        <img src="../../public/images/Auto carriers  logo.jpg"
+            onerror="this.onerror=null;this.src='../../public/images/Auto%20carriers%20%20logo.jpg';"
+            class="brand-mark rounded mx-auto d-block" alt="Auto Carriers logo">
     </header>
 
     <div class="container-fluid">
@@ -25,27 +29,28 @@
                         <ul class="nav flex-column">
                             <li class="nav-item">
                                 <a class="nav-link d-flex align-items-center gap-2" href="policyManual.html">
-                                    Policy Manual
+                                    Policies
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link d-flex align-items-center gap-2" href="EmsSopIndex.html">
-                                    EMS SOP Index
+                                <a class="nav-link d-flex align-items-center gap-2" href="SOP.html">
+                                    SOP
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link d-flex align-items-center gap-2" href="FlowDiaIndex.html">
-                                    Flow Diagram index
+                                <a class="nav-link d-flex align-items-center gap-2" href="DriverRegister.html">
+                                    Driver register
+                                </a>
+                            </li>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link d-flex align-items-center gap-2" href="PermitRegister.html">
+                                    Permit register
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link d-flex align-items-center gap-2" href="SupDocs.html">
-                                    Supporting documents Index
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link d-flex align-items-center gap-2" href="WasteManagemt.html">
-                                    Waste Management
+                                <a class="nav-link d-flex align-items-center gap-2" href="Documents.html">
+                                    Documents
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -59,8 +64,9 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link d-flex align-items-center gap-2" href="Certs.html">
-                                    Certificates
+                                <a class="nav-link d-flex align-items-center gap-2"
+                                    href="../Fleet inventory/FleetInventory.html" target="_blank" rel="noopener">
+                                    Fleet Inventory
                                 </a>
                             </li>
                         </ul>
@@ -81,174 +87,115 @@
             </div>
 
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-                <section class="hero" id="overview">
-                    <div class="hero-text">
-                        <p class="eyebrow">ISO 14001 readiness</p>
-                        <h1>Environmental control tower</h1>
-                        <p class="lead">Everything you need in one cockpit: emissions, waste, reports, SOPs and more.
-                        </p>
-                        <div class="hero-actions">
-                            <a class="btn btn-success shadow-sm" href="policyManual.html">Open policy manual</a>
-                            <button class="btn btn-outline-light" type="button" data-scroll-target="#kms-panel">
-                                Jump to data
-                            </button>
-                        </div>
-                    </div>
-                    <div class="hero-objectives">
-                        <p class="eyebrow">Objectives &amp; targets 2026</p>
-                    </div>
-                    <div class="hero-metrics" aria-label="Objectives and targets for 2026">
-                        <div class="hero-metric">
-                            <span>CO2 emissions</span>
-                            <strong>-3%</strong>
-                            <small>Reduce by December 2026 vs 2025 baseline</small>
-                        </div>
-                        <div class="hero-metric">
-                            <span>Tyre failures</span>
-                            <strong>-2%</strong>
-                            <small>Cut year-on-year when comparing 2025 to 2026</small>
-                        </div>
-                        <div class="hero-metric">
-                            <span>Spill incidents</span>
-                            <strong>-5%</strong>
-                            <small>Reduce total spills for 2026 vs 2025</small>
-                        </div>
+                <section class="page-hero">
+                    <span class="badge">RTMS Quantitative Dashboard</span>
+                    <h1>Monthly operational safety and distance performance</h1>
+                    <p>This dashboard tracks monthly speeding occurrences, shift hours, accidents, and distance
+                        covered for longhaul and local fleets. Use it to monitor risk exposure and operational
+                        throughput in one view.</p>
+                    <div class="hero-actions">
+                        <button class="btn btn-success" type="button" data-scroll-target="#trend-panel">View trend
+                            chart</button>
+                        <button class="btn btn-outline-light" type="button" data-scroll-target="#data-panel">Jump to
+                            data table</button>
                     </div>
                 </section>
 
-                <section class="insights-grid" aria-label="Key KPI highlights">
+                <section class="insights-grid" aria-label="Headline RTMS indicators">
                     <article class="stat-card">
-                        <p class="stat-label">2025 CO2-e footprint</p>
-                        <p class="stat-value" id="stat-total">--</p>
-                        <p class="stat-trend" id="stat-change">--</p>
-                        <p class="stat-note">vs 2024 baseline</p>
+                        <p class="stat-label">Total distance</p>
+                        <p class="stat-value" id="stat-total-distance">-- km</p>
+                        <p class="stat-trend" id="stat-average-distance">--</p>
+                        <p class="stat-note">Combined longhaul + local</p>
                     </article>
                     <article class="stat-card">
-                        <p class="stat-label">Peak emissions month</p>
-                        <p class="stat-value" id="stat-peak">--</p>
-                        <p class="stat-note">Focus mitigation during peak months</p>
+                        <p class="stat-label">Total accidents</p>
+                        <p class="stat-value" id="stat-total-accidents">--</p>
+                        <p class="stat-trend" id="stat-accident-rate">--</p>
+                        <p class="stat-note">Accident rate per 100,000 km</p>
                     </article>
                     <article class="stat-card">
-                        <p class="stat-label">Lowest intensity month</p>
-                        <p class="stat-value" id="stat-best">--</p>
-                        <p class="stat-note">Replicate operating conditions</p>
+                        <p class="stat-label">Speeding occurrences</p>
+                        <p class="stat-value" id="stat-total-speeding">--</p>
+                        <p class="stat-trend" id="stat-speeding-rate">--</p>
+                        <p class="stat-note">Speeding rate per 100,000 km</p>
                     </article>
                     <article class="stat-card">
-                        <p class="stat-label">Fleet km travelled 2025</p>
-                        <p class="stat-value" id="stat-kms">--</p>
-                        <p class="stat-note" id="stat-kms-delta">Awaiting sync...</p>
-                    </article>
-                    <article class="stat-card">
-                        <p class="stat-label">2025 CO2 intensity</p>
-                        <p class="stat-value" id="stat-intensity">--</p>
-                        <p class="stat-note" id="stat-intensity-delta">Awaiting 2024 comparison</p>
+                        <p class="stat-label">Shift hours</p>
+                        <p class="stat-value" id="stat-total-shift">-- h</p>
+                        <p class="stat-trend" id="stat-average-shift">--</p>
+                        <p class="stat-note">Average shift hours per month</p>
                     </article>
                 </section>
 
-                <section class="data-panel" id="emissions-panel">
+                <section class="data-panel" id="trend-panel">
                     <div class="panel-header">
                         <div>
-                            <p class="eyebrow">Emissions trajectory</p>
-                            <h2>Carbon intensity by month</h2>
-                            <p>Track how diesel to electric conversions, eco-driving, and kilometers travelled shift
-                                the monthly footprint between 2024 and 2025.</p>
+                            <p class="eyebrow">Safety + throughput trend</p>
+                            <h2>Total distance vs incidents</h2>
+                            <p>Bars show total monthly distance. Lines show accidents and speeding occurrences to
+                                expose high-risk periods relative to output.</p>
                         </div>
                         <div class="panel-actions">
-                            <a class="btn btn-outline-light" href="Dash.html" target="_blank">Open full dashboard</a>
+                            <button class="btn btn-outline-light" type="button" id="toggle-accidents">Toggle
+                                accidents</button>
+                            <button class="btn btn-outline-light" type="button" id="toggle-speeding">Toggle
+                                speeding</button>
                         </div>
                     </div>
-                    <canvas class="my-4 w-100" id="myChart" width="900" height="260" aria-label="CO2 trend chart"
-                        role="img"></canvas>
+                    <div class="chart-wrapper" style="height:420px">
+                        <canvas id="operationsChart" role="img"
+                            aria-label="RTMS distance versus incidents chart"></canvas>
+                    </div>
                 </section>
 
-                <section class="data-panel" id="kms-panel">
+                <section class="data-panel">
                     <div class="panel-header">
                         <div>
-                            <p class="eyebrow">Fleet utilization</p>
-                            <h2>Monthly kilometers</h2>
-                            <p>Telematics feed refreshed daily. Use the search to spotlight a specific month or year.
-                            </p>
-                        </div>
-                        <div class="table-controls">
-                            <input type="search" id="tableSearch" class="form-control" placeholder="Search month">
-                            <button class="btn btn-success" type="button" id="downloadCsv">Download CSV</button>
+                            <p class="eyebrow">Fleet mix and labor pattern</p>
+                            <h2>Longhaul vs local distance with shift hours</h2>
+                            <p>Stacked bars split total distance by operation type, while the line tracks total shift
+                                hours worked each month.</p>
                         </div>
                     </div>
-                    <div class="table-responsive small">
-                        <table id="data-table" class="table table-dark table-striped align-middle">
-                            <thead></thead>
+                    <div class="chart-wrapper" style="height:340px">
+                        <canvas id="fleetMixChart" role="img"
+                            aria-label="RTMS longhaul local and shift hours chart"></canvas>
+                    </div>
+                </section>
+
+                <section class="data-panel" id="data-panel">
+                    <div class="panel-header">
+                        <div>
+                            <p class="eyebrow">Supporting data</p>
+                            <h2>Monthly RTMS dataset</h2>
+                            <p>Search by month or value to inspect raw metrics and monthly incident rates.</p>
+                        </div>
+                        <div class="table-controls">
+                            <input type="search" class="table-search" placeholder="Search month or value"
+                                id="rtms-table-search">
+                        </div>
+                    </div>
+                    <div class="doc-table-wrapper">
+                        <table class="doc-table" id="rtms-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Month</th>
+                                    <th scope="col">Speeding</th>
+                                    <th scope="col">Shift hours</th>
+                                    <th scope="col">Accidents</th>
+                                    <th scope="col">Longhaul km</th>
+                                    <th scope="col">Local km</th>
+                                    <th scope="col">Total km</th>
+                                    <th scope="col">Accidents / 100k km</th>
+                                    <th scope="col">Speeding / 100k km</th>
+                                </tr>
+                            </thead>
                             <tbody></tbody>
                         </table>
                     </div>
-                    <p class="table-footnote">Source: Webfleet telematics. Variance column compares 2025 to 2024.</p>
-                </section>
-
-                <section class="story-carousel" aria-label="Strategic highlights">
-                    <div class="panel-header">
-                        <div>
-                            <p class="eyebrow">Storyline</p>
-                            <h2>What changed in 2025 vs 2024</h2>
-                        </div>
-                        <div class="panel-actions">
-                            <a class="btn btn-outline-light" href="reports.html">View supporting reports</a>
-                        </div>
-                    </div>
-                    <div id="mainCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="11000">
-                        <div class="carousel-inner">
-                            <div class="carousel-item active">
-                                <div class="story-card">
-                                    <h3>CO2-e reduction momentum</h3>
-                                    <img src="../../public/images/truck-carbon-dioxide-co2-exhaust-colored-vector-41573226.webp"
-                                        alt="Truck emitting carbon against a green background"
-                                        class="img-fluid story-image">
-                                    <p>Emissions changed <span id="carousel-change">--</span> in <span
-                                            id="current-year-copy">2025</span> vs <span
-                                            id="baseline-year-copy">2024</span>.</p>
-                                    <p>Totals: <span id="baseline-total">--</span> kg -> <span
-                                            id="current-total">--</span> kg.</p>
-                                    <a href="Dash.html" class="btn btn-success" target="_blank">More carbon detail</a>
-                                </div>
-                            </div>
-                            <div class="carousel-item">
-                                <div class="story-card">
-                                    <h3>Digital inspections</h3>
-                                    <img src="../../public/images/technology-smartphone-cartoon_24640-52341.avif"
-                                        alt="Technician using digital checklist" class="img-fluid story-image">
-                                    <p>1641 sheets of paper saved by switching to mobile inspections since July 2024.
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="carousel-item">
-                                <div class="story-card">
-                                    <h3>Reduction in spills</h3>
-                                    <img src="../../public/images/oil leak-1438015603-612x612.jpg"
-                                        alt="Oil leak illustration" class="img-fluid story-image">
-                                    <p>Spills reduced from 17 to 15 year-on-year thanks to new containment kits.</p>
-                                    <a href="Spills.html" class="btn btn-success">See spill analysis</a>
-                                </div>
-                            </div>
-                            <div class="carousel-item">
-                                <div class="story-card">
-                                    <h3>Tyre blowouts contained</h3>
-                                    <img src="../../public/images/Tyre blowout.jpg" alt="Tyre blowout photo"
-                                        class="img-fluid story-image">
-                                    <p>Blowouts increased 18.2% in 2025 this is due to higher delivery mileage and poor
-                                        road conditions.</p>
-                                    <a href="BlowOuts22vs23.html" class="btn btn-success">Review tyre data</a>
-                                </div>
-                            </div>
-                        </div>
-                        <button class="carousel-control-prev" type="button" data-bs-target="#mainCarousel"
-                            data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Previous</span>
-                        </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#mainCarousel"
-                            data-bs-slide="next">
-                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Next</span>
-                        </button>
-                    </div>
+                    <p class="table-caption">Rates are normalized per 100,000 km to compare risk across months with
+                        different distance volumes.</p>
                 </section>
 
             </main>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="RTMS long-haul and local driver register.">
+    <title>Driver Register | Auto Carriers RTMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link href="../styles/dashboard.css" rel="stylesheet">
+</head>
+
+<body>
+    <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white d-flex align-items-center" href="home.html">
+            Auto Carriers
+        </a>
+        <img src="../../public/images/Auto carriers  logo.jpg"
+            onerror="this.onerror=null;this.src='../../public/images/Auto%20carriers%20%20logo.jpg';"
+            class="brand-mark rounded mx-auto d-block" alt="Auto Carriers logo">
+
+        <div class="d-flex align-items-center gap-2 me-3">
+            <a class="btn btn-outline-light btn-sm" href="home.html">Back to control tower</a>
+            <a class="btn btn-success btn-sm" href="../../public/data/Driver Register 2026.xlsx" download>Driver
+                regsiter </a>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        <section class="page-hero">
+            <span class="badge">RTMS Driver Register</span>
+            <h1>Driver registry</h1>
+            <p>This register loads both long-haul and local drivers, with a clear division field and filter controls
+                for quick operational lookup.</p>
+        </section>
+
+        <section class="insights-grid" aria-label="Driver register summary">
+            <article class="stat-card text-center">
+                <p class="stat-label">Total drivers</p>
+                <p class="stat-value" id="stat-total-drivers">--</p>
+                <p class="stat-note">Records loaded</p>
+            </article>
+            <article class="stat-card text-center">
+                <p class="stat-label">Long-haul drivers</p>
+                <p class="stat-value" id="stat-long-haul">--</p>
+                <p class="stat-note">Long-haul division</p>
+            </article>
+            <article class="stat-card text-center">
+                <p class="stat-label">Local drivers</p>
+                <p class="stat-value" id="stat-local">--</p>
+                <p class="stat-note">Local division</p>
+            </article>
+        </section>
+
+        <section class="data-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Driver matrix</p>
+                    <h2>Driver records</h2>
+                    <p>Search by division, employee number, name, or ID number.</p>
+                </div>
+                <div class="table-controls">
+                    <select class="table-search" id="division-filter" aria-label="Filter by division">
+                        <option value="all">All divisions</option>
+                        <option value="Long-haul">Long-haul</option>
+                        <option value="Local">Local</option>
+                    </select>
+                    <input type="search" class="table-search" id="driver-search" placeholder="Search drivers...">
+                </div>
+            </div>
+
+            <div class="doc-table-wrapper">
+                <table class="doc-table" id="driver-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Division</th>
+                            <th scope="col">Employee Number</th>
+                            <th scope="col">Driver Name</th>
+                            <th scope="col">ID Number</th>
+                        </tr>
+                    </thead>
+                    <tbody id="driver-table-body"></tbody>
+                </table>
+            </div>
+            <p class="table-caption" id="driver-summary-note">Loading driver records...</p>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+    <script>
+        const longHaulDataPath = "../../public/data/LongHaulDrivers.JSON";
+        const localDataPath = "../../public/data/LocalDrivers.JSON";
+
+        const state = {
+            allDrivers: [],
+            filteredDrivers: []
+        };
+
+        function normalizeText(value) {
+            return String(value || "").trim().toLowerCase();
+        }
+
+        function isValidSouthAfricanId(value) {
+            return /^\d{13}$/.test(String(value || "").trim());
+        }
+
+        function mapDrivers(records, divisionName) {
+            if (!Array.isArray(records)) return [];
+
+            return records.map((driver, index) => {
+                const fallbackCode = `${divisionName === "Long-haul" ? "LH" : "LC"}-${index + 1}`;
+                const employeeNumber = String(driver.employeeNumber || fallbackCode).trim();
+                const name = String(driver.name || "N/A").trim();
+                const rawId = String(driver.idNumber || "").trim();
+
+                return {
+                    division: divisionName,
+                    employeeNumber,
+                    name,
+                    idNumber: isValidSouthAfricanId(rawId) ? rawId : (rawId || "N/A")
+                };
+            });
+        }
+
+        function updateStats(drivers) {
+            const totalDrivers = drivers.length;
+            const longHaul = drivers.filter((driver) => driver.division === "Long-haul").length;
+            const local = drivers.filter((driver) => driver.division === "Local").length;
+
+            document.getElementById("stat-total-drivers").textContent = totalDrivers;
+            document.getElementById("stat-long-haul").textContent = longHaul;
+            document.getElementById("stat-local").textContent = local;
+        }
+
+        function renderRows() {
+            const tbody = document.getElementById("driver-table-body");
+            const note = document.getElementById("driver-summary-note");
+            tbody.innerHTML = "";
+
+            if (!state.filteredDrivers.length) {
+                tbody.innerHTML = '<tr><td colspan="4" class="muted">No matching drivers found.</td></tr>';
+                note.textContent = "No records match the current filters.";
+                return;
+            }
+
+            state.filteredDrivers.forEach((driver) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${String(driver.division || "N/A")}</td>
+                    <td>${String(driver.employeeNumber || "N/A")}</td>
+                    <td>${String(driver.name || "N/A")}</td>
+                    <td>${String(driver.idNumber || "N/A")}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            note.textContent = `Showing ${state.filteredDrivers.length} of ${state.allDrivers.length} drivers.`;
+        }
+
+        function applyFilters() {
+            const query = normalizeText(document.getElementById("driver-search")?.value);
+            const divisionFilter = document.getElementById("division-filter")?.value || "all";
+
+            state.filteredDrivers = state.allDrivers.filter((driver) => {
+                const matchesDivision = divisionFilter === "all" || driver.division === divisionFilter;
+                const combined = `${driver.division || ""} ${driver.employeeNumber || ""} ${driver.name || ""} ${driver.idNumber || ""}`;
+                const matchesQuery = !query || normalizeText(combined).includes(query);
+                return matchesDivision && matchesQuery;
+            });
+
+            renderRows();
+        }
+
+        async function loadDrivers() {
+            const note = document.getElementById("driver-summary-note");
+
+            try {
+                const [longHaulResponse, localResponse] = await Promise.all([
+                    fetch(longHaulDataPath, { cache: "no-store" }),
+                    fetch(localDataPath, { cache: "no-store" })
+                ]);
+
+                if (!longHaulResponse.ok || !localResponse.ok) {
+                    throw new Error(`Unable to load driver register (${longHaulResponse.status}/${localResponse.status})`);
+                }
+
+                const [longHaulPayload, localPayload] = await Promise.all([
+                    longHaulResponse.json(),
+                    localResponse.json()
+                ]);
+
+                const longHaulDrivers = mapDrivers(longHaulPayload, "Long-haul");
+                const localDrivers = mapDrivers(localPayload, "Local");
+
+                state.allDrivers = [...longHaulDrivers, ...localDrivers];
+                state.filteredDrivers = [...state.allDrivers];
+
+                updateStats(state.allDrivers);
+                renderRows();
+            } catch (error) {
+                console.error(error);
+                note.textContent = "Unable to load driver data. Please verify LongHaulDrivers.JSON and LocalDrivers.JSON.";
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("driver-search")?.addEventListener("input", applyFilters);
+            document.getElementById("division-filter")?.addEventListener("change", applyFilters);
+            loadDrivers();
+        });
+    </script>
+</body>
+
+</html>

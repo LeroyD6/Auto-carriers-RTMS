@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="RTMS tyre breakdown comparison for 2025 vs 2024.">
+    <title>Tyre Breakdown Comparison | Auto Carriers RTMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link href="../styles/dashboard.css" rel="stylesheet">
+    <style>
+        .chart-card {
+            background: var(--card-alt);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            padding: 1rem;
+            min-height: 360px;
+        }
+
+        .chart-card canvas {
+            width: 100% !important;
+            height: 320px !important;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white d-flex align-items-center" href="home.html">
+            Auto Carriers
+        </a>
+        <img src="../../public/images/Auto carriers  logo.jpg"
+            onerror="this.onerror=null;this.src='../../public/images/Auto%20carriers%20%20logo.jpg';"
+            class="brand-mark rounded mx-auto d-block" alt="Auto Carriers logo">
+
+        <div class="d-flex align-items-center gap-2 me-3">
+            <a class="btn btn-outline-light btn-sm" href="reports.html">Back to reports hub</a>
+            <a class="btn btn-success btn-sm" href="../../public/pdf/Reports/TYRE ISSUES.xlsx" target="_blank"
+                rel="noopener">Open source file</a>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        <section class="page-hero">
+            <span class="badge">RTMS Reports</span>
+            <h1>Tyre breakdown comparison (2025 vs 2024)</h1>
+            <p>Monthly comparison of tyre breakdown incidents based on the provided 2025 and 2024 tyre issue logs.
+            </p>
+        </section>
+
+        <section class="insights-grid" aria-label="Tyre breakdown summary">
+            <article class="stat-card text-center">
+                <p class="stat-label">2025 total incidents</p>
+                <p class="stat-value" id="total-2025">--</p>
+                <p class="stat-note">All categories combined</p>
+            </article>
+            <article class="stat-card text-center">
+                <p class="stat-label">2024 total incidents</p>
+                <p class="stat-value" id="total-2024">--</p>
+                <p class="stat-note">All categories combined</p>
+            </article>
+            <article class="stat-card text-center">
+                <p class="stat-label">Variance</p>
+                <p class="stat-value" id="variance-total">--</p>
+                <p class="stat-note">2025 minus 2024</p>
+            </article>
+        </section>
+
+        <section class="data-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Monthly trend</p>
+                    <h2>Defect comparison graph</h2>
+                    <p>Select a defect category to compare monthly values for 2025 vs 2024.</p>
+                </div>
+                <select class="table-search" id="category-select"
+                    aria-label="Select defect category for chart"></select>
+            </div>
+            <div class="chart-card">
+                <canvas id="monthly-comparison-chart" aria-label="Tyre defects monthly comparison chart"></canvas>
+            </div>
+        </section>
+
+        <section class="data-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Defect totals</p>
+                    <h2>Yearly totals by defect category</h2>
+                    <p>Grouped bar graph showing each defect category total for 2025 and 2024.</p>
+                </div>
+            </div>
+            <div class="chart-card">
+                <canvas id="category-totals-chart" aria-label="Tyre defect category totals chart"></canvas>
+            </div>
+        </section>
+
+        <section class="data-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Overall trend</p>
+                    <h2>Monthly total incidents graph</h2>
+                    <p>Total tyre incidents per month across all categories, comparing 2025 and 2024.</p>
+                </div>
+            </div>
+            <div class="chart-card">
+                <canvas id="monthly-totals-chart" aria-label="Tyre incident monthly totals chart"></canvas>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        const tyre2025 = {
+            "Puncture-related": [4, 1, 9, 0, 1, 0, 1, 2, 2, 8, 5, 1],
+            "Blowout/Bust-related": [5, 3, 3, 2, 2, 3, 0, 4, 2, 2, 3, 0],
+            "Other tyre faults": [0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 7, 0]
+        };
+
+        const tyre2024 = {
+            "Puncture-related": [8, 5, 5, 7, 7, 7, 4, 4, 5, 5, 4, 4],
+            "Blowout/Bust-related": [1, 1, 1, 1, 0, 0, 0, 0, 1, 2, 0, 0],
+            "Other tyre faults": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        };
+
+        function sum(values) {
+            return values.reduce((acc, value) => acc + value, 0);
+        }
+
+        let monthlyComparisonChart;
+        let categoryTotalsChart;
+        let monthlyTotalsChart;
+
+        function getCategoryTotals(dataset) {
+            return Object.keys(dataset).map((category) => sum(dataset[category] || []));
+        }
+
+        function getMonthlyTotals(dataset) {
+            return months.map((_, monthIndex) => {
+                return Object.values(dataset).reduce((acc, values) => acc + (values[monthIndex] || 0), 0);
+            });
+        }
+
+        function renderCategoryOptions() {
+            const select = document.getElementById("category-select");
+            select.innerHTML = "";
+
+            Object.keys(tyre2025).forEach((category) => {
+                const option = document.createElement("option");
+                option.value = category;
+                option.textContent = category;
+                select.appendChild(option);
+            });
+        }
+
+        function renderMonthlyComparisonChart(category) {
+            const context = document.getElementById("monthly-comparison-chart").getContext("2d");
+            const values2025 = tyre2025[category] || new Array(12).fill(0);
+            const values2024 = tyre2024[category] || new Array(12).fill(0);
+
+            if (monthlyComparisonChart) {
+                monthlyComparisonChart.destroy();
+            }
+
+            monthlyComparisonChart = new Chart(context, {
+                type: "line",
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: `${category} 2025`,
+                            data: values2025,
+                            borderColor: "#6f94ff",
+                            backgroundColor: "rgba(111, 148, 255, 0.25)",
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: false
+                        },
+                        {
+                            label: `${category} 2024`,
+                            data: values2024,
+                            borderColor: "#eb3236",
+                            backgroundColor: "rgba(235, 50, 54, 0.2)",
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: "#ffffff"
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: "#ffffff" },
+                            grid: { color: "rgba(255,255,255,0.12)" }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: "#ffffff", precision: 0 },
+                            grid: { color: "rgba(255,255,255,0.12)" }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderCategoryTotalsChart() {
+            const context = document.getElementById("category-totals-chart").getContext("2d");
+            const categories = Object.keys(tyre2025);
+
+            if (categoryTotalsChart) {
+                categoryTotalsChart.destroy();
+            }
+
+            categoryTotalsChart = new Chart(context, {
+                type: "bar",
+                data: {
+                    labels: categories,
+                    datasets: [
+                        {
+                            label: "2025",
+                            data: getCategoryTotals(tyre2025),
+                            backgroundColor: "rgba(111, 148, 255, 0.7)",
+                            borderColor: "#6f94ff",
+                            borderWidth: 1
+                        },
+                        {
+                            label: "2024",
+                            data: getCategoryTotals(tyre2024),
+                            backgroundColor: "rgba(235, 50, 54, 0.65)",
+                            borderColor: "#eb3236",
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: "#ffffff"
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: "#ffffff" },
+                            grid: { color: "rgba(255,255,255,0.12)" }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: "#ffffff", precision: 0 },
+                            grid: { color: "rgba(255,255,255,0.12)" }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderMonthlyTotalsChart() {
+            const context = document.getElementById("monthly-totals-chart").getContext("2d");
+
+            if (monthlyTotalsChart) {
+                monthlyTotalsChart.destroy();
+            }
+
+            monthlyTotalsChart = new Chart(context, {
+                type: "bar",
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: "2025 total incidents",
+                            data: getMonthlyTotals(tyre2025),
+                            backgroundColor: "rgba(111, 148, 255, 0.7)",
+                            borderColor: "#6f94ff",
+                            borderWidth: 1
+                        },
+                        {
+                            label: "2024 total incidents",
+                            data: getMonthlyTotals(tyre2024),
+                            backgroundColor: "rgba(235, 50, 54, 0.65)",
+                            borderColor: "#eb3236",
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: "#ffffff"
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: "#ffffff" },
+                            grid: { color: "rgba(255,255,255,0.12)" }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: "#ffffff", precision: 0 },
+                            grid: { color: "rgba(255,255,255,0.12)" }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderSummary(dataset2025, dataset2024) {
+            const total2025 = Object.values(dataset2025).reduce((acc, values) => acc + sum(values), 0);
+            const total2024 = Object.values(dataset2024).reduce((acc, values) => acc + sum(values), 0);
+            const variance = total2025 - total2024;
+
+            document.getElementById("total-2025").textContent = total2025;
+            document.getElementById("total-2024").textContent = total2024;
+            document.getElementById("variance-total").textContent = variance;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            renderCategoryOptions();
+            const defaultCategory = Object.keys(tyre2025)[0];
+            renderMonthlyComparisonChart(defaultCategory);
+            renderCategoryTotalsChart();
+            renderMonthlyTotalsChart();
+            renderSummary(tyre2025, tyre2024);
+
+            document.getElementById("category-select")?.addEventListener("change", (event) => {
+                renderMonthlyComparisonChart(event.target.value);
+            });
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="RTMS performance evaluation dashboard for 2025 quarterly operational and safety metrics.">
+    <title>Performance Evaluation 2025 | Auto Carriers RTMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link href="../styles/dashboard.css" rel="stylesheet">
+    <style>
+        .chart-card {
+            background: var(--card-alt);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            padding: 1rem;
+            min-height: 360px;
+        }
+
+        .chart-card canvas {
+            width: 100% !important;
+            height: 320px !important;
+        }
+
+        #performance-table {
+            min-width: 1600px;
+        }
+
+        #monthly-performance-table {
+            min-width: 1200px;
+        }
+
+        #performance-table tbody tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        #performance-table tfoot tr {
+            background: rgba(111, 148, 255, 0.2);
+            font-weight: 700;
+        }
+
+        #monthly-performance-table tbody tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        #monthly-performance-table tfoot tr {
+            background: rgba(111, 148, 255, 0.2);
+            font-weight: 700;
+        }
+
+        #performance-table th:first-child,
+        #performance-table td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background: rgba(1, 0, 101, 0.92);
+        }
+
+        #performance-table thead th:first-child {
+            z-index: 3;
+        }
+
+        #performance-table tfoot td:first-child {
+            z-index: 3;
+        }
+
+        #monthly-performance-table th:first-child,
+        #monthly-performance-table td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 2;
+            background: rgba(1, 0, 101, 0.92);
+        }
+
+        #monthly-performance-table thead th:first-child,
+        #monthly-performance-table tfoot td:first-child {
+            z-index: 3;
+        }
+
+        .section-toggle {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white d-flex align-items-center" href="home.html">
+            Auto Carriers
+        </a>
+        <img src="../../public/images/Auto carriers  logo.jpg"
+            onerror="this.onerror=null;this.src='../../public/images/Auto%20carriers%20%20logo.jpg';"
+            class="brand-mark rounded mx-auto d-block" alt="Auto Carriers logo">
+
+        <div class="d-flex align-items-center gap-2 me-3">
+            <a class="btn btn-outline-light btn-sm" href="reports.html">Back to reports hub</a>
+            <a class="btn btn-success btn-sm" href="../../public/data/Performance%20Evaluation%202025%20RTMS.xlsx"
+                download>Download Excel</a>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        <section class="page-hero">
+            <span class="badge">RTMS Reports</span>
+            <h1>Performance Evaluation 2025</h1>
+            <p>Quarterly view of operations, safety, and driver compliance indicators for 2025.</p>
+        </section>
+
+        <nav class="section-toggle" aria-label="Jump to report section">
+            <a class="btn btn-outline-light btn-sm" href="#quarterly-section">Quarterly section</a>
+            <a class="btn btn-outline-light btn-sm" href="#monthly-section">Monthly section</a>
+        </nav>
+
+        <section class="insights-grid" aria-label="Performance summary">
+            <article class="stat-card text-center">
+                <p class="stat-label">Total trips</p>
+                <p class="stat-value" id="total-trips">--</p>
+                <p class="stat-note">All quarters</p>
+            </article>
+            <article class="stat-card text-center">
+                <p class="stat-label">Total KMs</p>
+                <p class="stat-value" id="total-kms">--</p>
+                <p class="stat-note">Fleet distance travelled</p>
+            </article>
+            <article class="stat-card text-center">
+                <p class="stat-label">Total collisions</p>
+                <p class="stat-value" id="total-collisions">--</p>
+                <p class="stat-note">3rd party + company error</p>
+            </article>
+            <article class="stat-card text-center">
+                <p class="stat-label">Traffic violations</p>
+                <p class="stat-value" id="total-violations">--</p>
+                <p class="stat-note">Year total</p>
+            </article>
+        </section>
+
+        <section class="data-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Operations Trend</p>
+                    <h2>Trips and KMs by quarter</h2>
+                    <p>Bar and line chart showing activity volume and travelled distance.</p>
+                </div>
+            </div>
+            <div class="chart-card">
+                <canvas id="operations-chart" aria-label="Trips and KMs by quarter"></canvas>
+            </div>
+        </section>
+
+        <section class="data-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Safety Trend</p>
+                    <h2>Collisions and traffic violations</h2>
+                    <p>Quarterly comparison of collisions by type alongside traffic violations.</p>
+                </div>
+            </div>
+            <div class="chart-card">
+                <canvas id="safety-chart" aria-label="Safety metrics by quarter"></canvas>
+            </div>
+        </section>
+
+        <section class="data-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Driver Compliance</p>
+                    <h2>Workforce and overload indicators</h2>
+                    <p>Quarterly view of employed, trained, medical fitness, chronic conditions, and overloaded trips.
+                    </p>
+                </div>
+            </div>
+            <div class="chart-card">
+                <canvas id="compliance-chart" aria-label="Driver and compliance metrics by quarter"></canvas>
+            </div>
+        </section>
+
+        <section class="data-panel" id="quarterly-section">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Quarterly Table</p>
+                    <h2>Performance Evaluation 2025 dataset</h2>
+                    <p>Detailed table of all quarterly metrics captured for the report.</p>
+                </div>
+            </div>
+            <div class="doc-table-wrapper">
+                <table class="doc-table" id="performance-table">
+                    <thead>
+                        <tr>
+                            <th>Quarter</th>
+                            <th>Vehicles</th>
+                            <th>Trips</th>
+                            <th>Total KMs</th>
+                            <th>Collisions 3rd party</th>
+                            <th>Collisions company error</th>
+                            <th>Fatalities</th>
+                            <th>Trips overloaded</th>
+                            <th>Avg mass overload</th>
+                            <th>Traffic violations</th>
+                            <th>Service overruns</th>
+                            <th>Drivers employed</th>
+                            <th>Medical fitness cert</th>
+                            <th>Chronic conditions</th>
+                            <th>Drivers trained</th>
+                            <th>Disciplinary habitual speeding</th>
+                            <th>Disciplinary excessive driving/shift hours</th>
+                            <th>Total disciplinary actions</th>
+                            <th>Other RTMS non-conformances</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <td>Total / Avg</td>
+                            <td id="ft-vehicles">--</td>
+                            <td id="ft-trips">--</td>
+                            <td id="ft-kms">--</td>
+                            <td id="ft-collision-third">--</td>
+                            <td id="ft-collision-company">--</td>
+                            <td id="ft-fatalities">--</td>
+                            <td id="ft-overloaded">--</td>
+                            <td id="ft-avg-mass">--</td>
+                            <td id="ft-violations">--</td>
+                            <td id="ft-overruns">--</td>
+                            <td id="ft-employed">--</td>
+                            <td id="ft-medical">--</td>
+                            <td id="ft-chronic">--</td>
+                            <td id="ft-trained">--</td>
+                            <td id="ft-habitual">--</td>
+                            <td id="ft-excessive">--</td>
+                            <td id="ft-disciplinary">--</td>
+                            <td id="ft-nonconformance">--</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </section>
+
+        <section class="data-panel" id="monthly-section">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Monthly Trend</p>
+                    <h2>Monthly safety and overload profile</h2>
+                    <p>Month-by-month view of KMs, collisions, traffic violations, overloaded trips, and overload mass.
+                    </p>
+                </div>
+            </div>
+            <div class="chart-card">
+                <canvas id="monthly-performance-chart" aria-label="Monthly performance metrics"></canvas>
+            </div>
+        </section>
+
+        <section class="data-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Monthly Table</p>
+                    <h2>Monthly operational data (Jan-Dec 2025)</h2>
+                    <p>Detailed monthly metrics added from the latest performance extract.</p>
+                </div>
+            </div>
+            <div class="doc-table-wrapper">
+                <table class="doc-table" id="monthly-performance-table">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Total KMs travelled</th>
+                            <th>Collisions 3rd party</th>
+                            <th>Collisions company error</th>
+                            <th>Fatalities</th>
+                            <th>Trips overloaded</th>
+                            <th>Avg mass overload</th>
+                            <th>Traffic violations</th>
+                            <th>Service overruns</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <td>Total / Avg</td>
+                            <td id="mft-kms">--</td>
+                            <td id="mft-collision-third">--</td>
+                            <td id="mft-collision-company">--</td>
+                            <td id="mft-fatalities">--</td>
+                            <td id="mft-overloaded">--</td>
+                            <td id="mft-avg-mass">--</td>
+                            <td id="mft-violations">--</td>
+                            <td id="mft-overruns">--</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const rows = [
+            {
+                quarter: "Q1 Jan - March",
+                vehicles: 38,
+                trips: 923,
+                kms: 1993079,
+                collisionThirdParty: 2,
+                collisionCompanyError: 3,
+                fatalities: 0,
+                tripsOverloaded: 0,
+                avgMassOverload: 0,
+                trafficViolations: 16,
+                serviceOverruns: 0,
+                driversEmployed: 38,
+                driversMedicalFitness: 38,
+                driversChronicConditions: 6,
+                driversTrained: 38,
+                disciplinaryHabitualSpeeding: 0,
+                disciplinaryExcessiveShiftHours: 0,
+                disciplinaryActions: 0,
+                rtmsNonConformances: 0
+            },
+            {
+                quarter: "Q2 April - June",
+                vehicles: 38,
+                trips: 868,
+                kms: 1802009,
+                collisionThirdParty: 6,
+                collisionCompanyError: 0,
+                fatalities: 0,
+                tripsOverloaded: 3,
+                avgMassOverload: 2040,
+                trafficViolations: 21,
+                serviceOverruns: 0,
+                driversEmployed: 38,
+                driversMedicalFitness: 38,
+                driversChronicConditions: 6,
+                driversTrained: 38,
+                disciplinaryHabitualSpeeding: 0,
+                disciplinaryExcessiveShiftHours: 0,
+                disciplinaryActions: 0,
+                rtmsNonConformances: 0
+            },
+            {
+                quarter: "Q3 July - September",
+                vehicles: 40,
+                trips: 1223,
+                kms: 2436757,
+                collisionThirdParty: 4,
+                collisionCompanyError: 4,
+                fatalities: 0,
+                tripsOverloaded: 0,
+                avgMassOverload: 0,
+                trafficViolations: 14,
+                serviceOverruns: 0,
+                driversEmployed: 40,
+                driversMedicalFitness: 40,
+                driversChronicConditions: 6,
+                driversTrained: 40,
+                disciplinaryHabitualSpeeding: 0,
+                disciplinaryExcessiveShiftHours: 0,
+                disciplinaryActions: 0,
+                rtmsNonConformances: 0
+            },
+            {
+                quarter: "Q4 October - December",
+                vehicles: 40,
+                trips: 1014,
+                kms: 2093221,
+                collisionThirdParty: 6,
+                collisionCompanyError: 1,
+                fatalities: 0,
+                tripsOverloaded: 4,
+                avgMassOverload: 3543,
+                trafficViolations: 3,
+                serviceOverruns: 0,
+                driversEmployed: 40,
+                driversMedicalFitness: 40,
+                driversChronicConditions: 6,
+                driversTrained: 40,
+                disciplinaryHabitualSpeeding: 0,
+                disciplinaryExcessiveShiftHours: 0,
+                disciplinaryActions: 0,
+                rtmsNonConformances: 0
+            }
+        ];
+
+        const monthlyRows = [
+            { month: "Jan", kms: 671296, collisionThirdParty: 2, collisionCompanyError: 2, fatalities: 0, tripsOverloaded: 0, avgMassOverload: 0, trafficViolations: 2, serviceOverruns: 0 },
+            { month: "Feb", kms: 596081, collisionThirdParty: 0, collisionCompanyError: 1, fatalities: 0, tripsOverloaded: 0, avgMassOverload: 0, trafficViolations: 2, serviceOverruns: 0 },
+            { month: "Mar", kms: 725702, collisionThirdParty: 0, collisionCompanyError: 0, fatalities: 0, tripsOverloaded: 0, avgMassOverload: 0, trafficViolations: 12, serviceOverruns: 0 },
+            { month: "Apr", kms: 562970, collisionThirdParty: 1, collisionCompanyError: 0, fatalities: 0, tripsOverloaded: 1, avgMassOverload: 1080, trafficViolations: 5, serviceOverruns: 0 },
+            { month: "May", kms: 568427, collisionThirdParty: 3, collisionCompanyError: 0, fatalities: 0, tripsOverloaded: 2, avgMassOverload: 3000, trafficViolations: 12, serviceOverruns: 0 },
+            { month: "Jun", kms: 670612, collisionThirdParty: 2, collisionCompanyError: 0, fatalities: 0, tripsOverloaded: 0, avgMassOverload: 0, trafficViolations: 4, serviceOverruns: 0 },
+            { month: "Jul", kms: 785096, collisionThirdParty: 2, collisionCompanyError: 2, fatalities: 0, tripsOverloaded: 0, avgMassOverload: 0, trafficViolations: 6, serviceOverruns: 0 },
+            { month: "Aug", kms: 834933, collisionThirdParty: 1, collisionCompanyError: 1, fatalities: 0, tripsOverloaded: 0, avgMassOverload: 0, trafficViolations: 6, serviceOverruns: 0 },
+            { month: "Sept", kms: 816746, collisionThirdParty: 1, collisionCompanyError: 1, fatalities: 0, tripsOverloaded: 0, avgMassOverload: 0, trafficViolations: 2, serviceOverruns: 0 },
+            { month: "Oct", kms: 784094, collisionThirdParty: 4, collisionCompanyError: 0, fatalities: 0, tripsOverloaded: 1, avgMassOverload: 1070, trafficViolations: 2, serviceOverruns: 0 },
+            { month: "Nov", kms: 794499, collisionThirdParty: 1, collisionCompanyError: 0, fatalities: 0, tripsOverloaded: 1, avgMassOverload: 1000, trafficViolations: 1, serviceOverruns: 0 },
+            { month: "Dec", kms: 514628, collisionThirdParty: 1, collisionCompanyError: 1, fatalities: 0, tripsOverloaded: 2, avgMassOverload: 8560, trafficViolations: 0, serviceOverruns: 0 }
+        ];
+
+        function sumBy(key) {
+            return rows.reduce((total, row) => total + (Number(row[key]) || 0), 0);
+        }
+
+        function averageBy(key) {
+            if (!rows.length) return 0;
+            return sumBy(key) / rows.length;
+        }
+
+        function numberFormat(value) {
+            return Number(value).toLocaleString();
+        }
+
+        function renderSummary() {
+            const totalTrips = sumBy("trips");
+            const totalKms = sumBy("kms");
+            const totalCollisions = sumBy("collisionThirdParty") + sumBy("collisionCompanyError");
+            const totalViolations = sumBy("trafficViolations");
+
+            document.getElementById("total-trips").textContent = numberFormat(totalTrips);
+            document.getElementById("total-kms").textContent = numberFormat(totalKms);
+            document.getElementById("total-collisions").textContent = numberFormat(totalCollisions);
+            document.getElementById("total-violations").textContent = numberFormat(totalViolations);
+        }
+
+        function renderOperationsChart() {
+            const context = document.getElementById("operations-chart").getContext("2d");
+            new Chart(context, {
+                type: "bar",
+                data: {
+                    labels: rows.map((item) => item.quarter),
+                    datasets: [
+                        {
+                            label: "Trips",
+                            data: rows.map((item) => item.trips),
+                            backgroundColor: "rgba(111, 148, 255, 0.72)",
+                            borderColor: "#6f94ff",
+                            borderWidth: 1,
+                            yAxisID: "y"
+                        },
+                        {
+                            label: "Total KMs",
+                            data: rows.map((item) => item.kms),
+                            type: "line",
+                            borderColor: "#9fbcff",
+                            backgroundColor: "rgba(159, 188, 255, 0.25)",
+                            pointBackgroundColor: "#9fbcff",
+                            pointRadius: 4,
+                            tension: 0.3,
+                            yAxisID: "y1"
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: "#ffffff" }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: "#ffffff" },
+                            grid: { color: "rgba(255,255,255,0.12)" }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: "#ffffff", precision: 0 },
+                            grid: { color: "rgba(255,255,255,0.12)" }
+                        },
+                        y1: {
+                            beginAtZero: true,
+                            position: "right",
+                            ticks: {
+                                color: "#9fbcff",
+                                callback: (value) => numberFormat(value)
+                            },
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderSafetyChart() {
+            const context = document.getElementById("safety-chart").getContext("2d");
+            new Chart(context, {
+                data: {
+                    labels: rows.map((item) => item.quarter),
+                    datasets: [
+                        {
+                            type: "bar",
+                            label: "Collisions 3rd party",
+                            data: rows.map((item) => item.collisionThirdParty),
+                            backgroundColor: "rgba(235, 50, 54, 0.65)",
+                            borderColor: "#eb3236",
+                            borderWidth: 1,
+                            stack: "collisions"
+                        },
+                        {
+                            type: "bar",
+                            label: "Collisions company error",
+                            data: rows.map((item) => item.collisionCompanyError),
+                            backgroundColor: "rgba(255, 168, 84, 0.75)",
+                            borderColor: "#ffa854",
+                            borderWidth: 1,
+                            stack: "collisions"
+                        },
+                        {
+                            type: "line",
+                            label: "Traffic violations",
+                            data: rows.map((item) => item.trafficViolations),
+                            borderColor: "#9fbcff",
+                            backgroundColor: "rgba(159, 188, 255, 0.25)",
+                            pointBackgroundColor: "#9fbcff",
+                            pointRadius: 4,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: "#ffffff" }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: "#ffffff" },
+                            grid: { color: "rgba(255,255,255,0.12)" }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: "#ffffff", precision: 0 },
+                            grid: { color: "rgba(255,255,255,0.12)" }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderComplianceChart() {
+            const context = document.getElementById("compliance-chart").getContext("2d");
+            new Chart(context, {
+                type: "bar",
+                data: {
+                    labels: rows.map((item) => item.quarter),
+                    datasets: [
+                        {
+                            label: "Drivers employed",
+                            data: rows.map((item) => item.driversEmployed),
+                            backgroundColor: "rgba(111, 148, 255, 0.72)",
+                            borderColor: "#6f94ff",
+                            borderWidth: 1
+                        },
+                        {
+                            label: "Drivers trained",
+                            data: rows.map((item) => item.driversTrained),
+                            backgroundColor: "rgba(111, 255, 196, 0.65)",
+                            borderColor: "#6fffc4",
+                            borderWidth: 1
+                        },
+                        {
+                            label: "Medical fitness certificate",
+                            data: rows.map((item) => item.driversMedicalFitness),
+                            backgroundColor: "rgba(159, 188, 255, 0.72)",
+                            borderColor: "#9fbcff",
+                            borderWidth: 1
+                        },
+                        {
+                            label: "Chronic conditions",
+                            data: rows.map((item) => item.driversChronicConditions),
+                            backgroundColor: "rgba(255, 168, 84, 0.75)",
+                            borderColor: "#ffa854",
+                            borderWidth: 1
+                        },
+                        {
+                            label: "Trips overloaded",
+                            data: rows.map((item) => item.tripsOverloaded),
+                            backgroundColor: "rgba(235, 50, 54, 0.65)",
+                            borderColor: "#eb3236",
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: "#ffffff" }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: "#ffffff" },
+                            grid: { color: "rgba(255,255,255,0.12)" }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: "#ffffff", precision: 0 },
+                            grid: { color: "rgba(255,255,255,0.12)" }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderTable() {
+            const tbody = document.querySelector("#performance-table tbody");
+            tbody.innerHTML = "";
+
+            rows.forEach((item) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${item.quarter}</td>
+                    <td>${numberFormat(item.vehicles)}</td>
+                    <td>${numberFormat(item.trips)}</td>
+                    <td>${numberFormat(item.kms)}</td>
+                    <td>${numberFormat(item.collisionThirdParty)}</td>
+                    <td>${numberFormat(item.collisionCompanyError)}</td>
+                    <td>${numberFormat(item.fatalities)}</td>
+                    <td>${numberFormat(item.tripsOverloaded)}</td>
+                    <td>${numberFormat(item.avgMassOverload)}</td>
+                    <td>${numberFormat(item.trafficViolations)}</td>
+                    <td>${numberFormat(item.serviceOverruns)}</td>
+                    <td>${numberFormat(item.driversEmployed)}</td>
+                    <td>${numberFormat(item.driversMedicalFitness)}</td>
+                    <td>${numberFormat(item.driversChronicConditions)}</td>
+                    <td>${numberFormat(item.driversTrained)}</td>
+                    <td>${numberFormat(item.disciplinaryHabitualSpeeding)}</td>
+                    <td>${numberFormat(item.disciplinaryExcessiveShiftHours)}</td>
+                    <td>${numberFormat(item.disciplinaryActions)}</td>
+                    <td>${numberFormat(item.rtmsNonConformances)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.getElementById("ft-vehicles").textContent = Math.round(averageBy("vehicles"));
+            document.getElementById("ft-trips").textContent = numberFormat(sumBy("trips"));
+            document.getElementById("ft-kms").textContent = numberFormat(sumBy("kms"));
+            document.getElementById("ft-collision-third").textContent = numberFormat(sumBy("collisionThirdParty"));
+            document.getElementById("ft-collision-company").textContent = numberFormat(sumBy("collisionCompanyError"));
+            document.getElementById("ft-fatalities").textContent = numberFormat(sumBy("fatalities"));
+            document.getElementById("ft-overloaded").textContent = numberFormat(sumBy("tripsOverloaded"));
+            document.getElementById("ft-avg-mass").textContent = numberFormat(Math.round(averageBy("avgMassOverload")));
+            document.getElementById("ft-violations").textContent = numberFormat(sumBy("trafficViolations"));
+            document.getElementById("ft-overruns").textContent = numberFormat(sumBy("serviceOverruns"));
+            document.getElementById("ft-employed").textContent = Math.round(averageBy("driversEmployed"));
+            document.getElementById("ft-medical").textContent = Math.round(averageBy("driversMedicalFitness"));
+            document.getElementById("ft-chronic").textContent = Math.round(averageBy("driversChronicConditions"));
+            document.getElementById("ft-trained").textContent = Math.round(averageBy("driversTrained"));
+            document.getElementById("ft-habitual").textContent = numberFormat(sumBy("disciplinaryHabitualSpeeding"));
+            document.getElementById("ft-excessive").textContent = numberFormat(sumBy("disciplinaryExcessiveShiftHours"));
+            document.getElementById("ft-disciplinary").textContent = numberFormat(sumBy("disciplinaryActions"));
+            document.getElementById("ft-nonconformance").textContent = numberFormat(sumBy("rtmsNonConformances"));
+        }
+
+        function monthlySumBy(key) {
+            return monthlyRows.reduce((total, row) => total + (Number(row[key]) || 0), 0);
+        }
+
+        function monthlyAverageBy(key) {
+            if (!monthlyRows.length) return 0;
+            return monthlySumBy(key) / monthlyRows.length;
+        }
+
+        function renderMonthlyPerformanceChart() {
+            const context = document.getElementById("monthly-performance-chart").getContext("2d");
+            new Chart(context, {
+                data: {
+                    labels: monthlyRows.map((item) => item.month),
+                    datasets: [
+                        {
+                            type: "line",
+                            label: "Total KMs",
+                            data: monthlyRows.map((item) => item.kms),
+                            borderColor: "#6f94ff",
+                            backgroundColor: "rgba(111, 148, 255, 0.2)",
+                            pointBackgroundColor: "#6f94ff",
+                            pointRadius: 3,
+                            tension: 0.25,
+                            yAxisID: "y1"
+                        },
+                        {
+                            type: "bar",
+                            label: "Traffic violations",
+                            data: monthlyRows.map((item) => item.trafficViolations),
+                            backgroundColor: "rgba(235, 50, 54, 0.65)",
+                            borderColor: "#eb3236",
+                            borderWidth: 1,
+                            yAxisID: "y"
+                        },
+                        {
+                            type: "bar",
+                            label: "Trips overloaded",
+                            data: monthlyRows.map((item) => item.tripsOverloaded),
+                            backgroundColor: "rgba(255, 168, 84, 0.7)",
+                            borderColor: "#ffa854",
+                            borderWidth: 1,
+                            yAxisID: "y"
+                        },
+                        {
+                            type: "line",
+                            label: "Avg mass overload",
+                            data: monthlyRows.map((item) => item.avgMassOverload),
+                            borderColor: "#9fbcff",
+                            backgroundColor: "rgba(159, 188, 255, 0.2)",
+                            pointBackgroundColor: "#9fbcff",
+                            pointRadius: 3,
+                            tension: 0.25,
+                            yAxisID: "y2"
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: "#ffffff" }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: "#ffffff" },
+                            grid: { color: "rgba(255,255,255,0.12)" }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: "#ffffff", precision: 0 },
+                            grid: { color: "rgba(255,255,255,0.12)" }
+                        },
+                        y1: {
+                            beginAtZero: true,
+                            position: "right",
+                            ticks: {
+                                color: "#6f94ff",
+                                callback: (value) => numberFormat(value)
+                            },
+                            grid: { drawOnChartArea: false }
+                        },
+                        y2: {
+                            beginAtZero: true,
+                            position: "right",
+                            offset: true,
+                            ticks: {
+                                color: "#9fbcff",
+                                callback: (value) => numberFormat(value)
+                            },
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderMonthlyPerformanceTable() {
+            const tbody = document.querySelector("#monthly-performance-table tbody");
+            tbody.innerHTML = "";
+
+            monthlyRows.forEach((item) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${item.month}</td>
+                    <td>${numberFormat(item.kms)}</td>
+                    <td>${numberFormat(item.collisionThirdParty)}</td>
+                    <td>${numberFormat(item.collisionCompanyError)}</td>
+                    <td>${numberFormat(item.fatalities)}</td>
+                    <td>${numberFormat(item.tripsOverloaded)}</td>
+                    <td>${numberFormat(item.avgMassOverload)}</td>
+                    <td>${numberFormat(item.trafficViolations)}</td>
+                    <td>${numberFormat(item.serviceOverruns)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.getElementById("mft-kms").textContent = numberFormat(monthlySumBy("kms"));
+            document.getElementById("mft-collision-third").textContent = numberFormat(monthlySumBy("collisionThirdParty"));
+            document.getElementById("mft-collision-company").textContent = numberFormat(monthlySumBy("collisionCompanyError"));
+            document.getElementById("mft-fatalities").textContent = numberFormat(monthlySumBy("fatalities"));
+            document.getElementById("mft-overloaded").textContent = numberFormat(monthlySumBy("tripsOverloaded"));
+            document.getElementById("mft-avg-mass").textContent = numberFormat(Math.round(monthlyAverageBy("avgMassOverload")));
+            document.getElementById("mft-violations").textContent = numberFormat(monthlySumBy("trafficViolations"));
+            document.getElementById("mft-overruns").textContent = numberFormat(monthlySumBy("serviceOverruns"));
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            renderSummary();
+            renderOperationsChart();
+            renderSafetyChart();
+            renderComplianceChart();
+            renderTable();
+            renderMonthlyPerformanceChart();
+            renderMonthlyPerformanceTable();
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

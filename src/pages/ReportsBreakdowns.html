@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="RTMS monthly breakdown comparison for 2025.">
+    <title>Breakdowns 2025 | Auto Carriers RTMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link href="../styles/dashboard.css" rel="stylesheet">
+    <style>
+        .chart-card {
+            background: var(--card-alt);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            padding: 1rem;
+            min-height: 380px;
+        }
+
+        .chart-card canvas {
+            width: 100% !important;
+            height: 340px !important;
+        }
+
+        #breakdown-table tbody tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        #breakdown-table tfoot tr {
+            background: rgba(111, 148, 255, 0.18);
+            font-weight: 700;
+        }
+
+        .delta-up {
+            color: #9fbcff;
+            font-weight: 600;
+        }
+
+        .delta-down {
+            color: #eb3236;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white d-flex align-items-center" href="home.html">
+            Auto Carriers
+        </a>
+        <img src="../../public/images/Auto carriers  logo.jpg"
+            onerror="this.onerror=null;this.src='../../public/images/Auto%20carriers%20%20logo.jpg';"
+            class="brand-mark rounded mx-auto d-block" alt="Auto Carriers logo">
+
+        <div class="d-flex align-items-center gap-2 me-3">
+            <a class="btn btn-outline-light btn-sm" href="reports.html">Back to reports hub</a>
+            <a class="btn btn-success btn-sm" href="../../public/pdf/Reports/BREAKDOWNS 25_26.xlsx" download>Download
+                Excel</a>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        <section class="page-hero">
+            <span class="badge">RTMS Reports</span>
+            <h1>Breakdowns per month (2025)</h1>
+            <p>Graph view of monthly breakdown counts for 2025 using the data provided from the breakdown register.</p>
+        </section>
+
+        <section class="insights-grid" aria-label="Breakdown summary">
+            <article class="stat-card text-center">
+                <p class="stat-label">Total breakdowns</p>
+                <p class="stat-value" id="total-breakdowns">--</p>
+                <p class="stat-note">Jan to Dec 2025</p>
+            </article>
+            <article class="stat-card text-center">
+                <p class="stat-label">Average per month</p>
+                <p class="stat-value" id="average-breakdowns">--</p>
+                <p class="stat-note">Across 12 months</p>
+            </article>
+            <article class="stat-card text-center">
+                <p class="stat-label">Highest month</p>
+                <p class="stat-value" id="peak-month">--</p>
+                <p class="stat-note">Most breakdowns in a month</p>
+            </article>
+        </section>
+
+        <section class="data-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">2025 Trend</p>
+                    <h2>Monthly breakdown graph</h2>
+                    <p>Bar graph of total breakdown incidents by month.</p>
+                </div>
+            </div>
+            <div class="chart-card">
+                <canvas id="breakdown-chart" aria-label="Breakdowns by month 2025"></canvas>
+            </div>
+        </section>
+
+        <section class="data-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">2025 Data Table</p>
+                    <h2>Monthly breakdown counts</h2>
+                    <p>Detailed table with month-on-month trend, contribution %, and totals.</p>
+                </div>
+            </div>
+            <div class="doc-table-wrapper">
+                <table class="doc-table" id="breakdown-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Month</th>
+                            <th scope="col">Breakdowns</th>
+                            <th scope="col">MoM change</th>
+                            <th scope="col">% of annual</th>
+                            <th scope="col">Cumulative total</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <td>Total / Avg</td>
+                            <td id="table-total-breakdowns">--</td>
+                            <td id="table-mom-summary">--</td>
+                            <td id="table-annual-share">100%</td>
+                            <td id="table-cumulative-final">--</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        const breakdowns2025 = [2, 4, 11, 7, 8, 6, 4, 7, 6, 9, 7, 7];
+
+        function sum(values) {
+            return values.reduce((acc, value) => acc + value, 0);
+        }
+
+        function renderSummary() {
+            const total = sum(breakdowns2025);
+            const average = (total / breakdowns2025.length).toFixed(1);
+            const peakValue = Math.max(...breakdowns2025);
+            const peakIndex = breakdowns2025.indexOf(peakValue);
+            const peakLabel = `${months[peakIndex]} (${peakValue})`;
+
+            document.getElementById("total-breakdowns").textContent = total;
+            document.getElementById("average-breakdowns").textContent = average;
+            document.getElementById("peak-month").textContent = peakLabel;
+        }
+
+        function renderChart() {
+            const context = document.getElementById("breakdown-chart").getContext("2d");
+            new Chart(context, {
+                type: "bar",
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: "Breakdowns 2025",
+                            data: breakdowns2025,
+                            backgroundColor: "rgba(111, 148, 255, 0.72)",
+                            borderColor: "#6f94ff",
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: "#ffffff"
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: "#ffffff" },
+                            grid: { color: "rgba(255,255,255,0.12)" }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: "#ffffff",
+                                precision: 0,
+                                stepSize: 1
+                            },
+                            grid: { color: "rgba(255,255,255,0.12)" }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderTable() {
+            const tbody = document.querySelector("#breakdown-table tbody");
+            tbody.innerHTML = "";
+
+            const annualTotal = sum(breakdowns2025);
+            let runningTotal = 0;
+            months.forEach((month, index) => {
+                const value = breakdowns2025[index] || 0;
+                const previousValue = index > 0 ? (breakdowns2025[index - 1] || 0) : null;
+                const monthDelta = previousValue === null ? 0 : value - previousValue;
+                const monthShare = annualTotal ? ((value / annualTotal) * 100).toFixed(1) : "0.0";
+                runningTotal += value;
+
+                const row = document.createElement("tr");
+                const deltaClass = monthDelta > 0 ? "delta-up" : (monthDelta < 0 ? "delta-down" : "");
+                const deltaLabel = previousValue === null
+                    ? "-"
+                    : `${monthDelta > 0 ? "+" : ""}${monthDelta}`;
+
+                row.innerHTML = `
+                    <td>${month}</td>
+                    <td>${value}</td>
+                    <td class="${deltaClass}">${deltaLabel}</td>
+                    <td>${monthShare}%</td>
+                    <td>${runningTotal}</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            document.getElementById("table-total-breakdowns").textContent = annualTotal;
+            document.getElementById("table-mom-summary").textContent = `Avg ${(
+                annualTotal / breakdowns2025.length
+            ).toFixed(1)} / month`;
+            document.getElementById("table-cumulative-final").textContent = runningTotal;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            renderSummary();
+            renderChart();
+            renderTable();
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

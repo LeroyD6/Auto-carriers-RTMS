@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="RTMS fleet inventory dashboard and vehicle detail registry.">
+    <title>Fleet Inventory | Auto Carriers RTMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="../styles/dashboard.css" rel="stylesheet">
+    <style>
+        .fleet-stats {
+            margin-bottom: 2rem;
+        }
+
+        .fleet-card {
+            border-radius: 1rem;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            background: rgba(255, 255, 255, 0.1);
+            -webkit-backdrop-filter: blur(14px);
+            backdrop-filter: blur(14px);
+        }
+
+        .fleet-card .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .fleet-card .card-body {
+            color: var(--stone);
+        }
+
+        .fleet-card .card-title,
+        .fleet-title,
+        .fleet-icon {
+            color: #9fbcff !important;
+        }
+
+        .rtms-spinner-wrap {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .rtms-error {
+            border-radius: 0.75rem;
+            padding: 1rem;
+            border: 1px solid rgba(235, 50, 54, 0.45);
+            background: rgba(235, 50, 54, 0.18);
+            color: #ffffff;
+        }
+
+        .rtms-empty {
+            border-radius: 0.75rem;
+            padding: 1rem;
+            border: 1px solid rgba(111, 148, 255, 0.45);
+            background: rgba(111, 148, 255, 0.2);
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .modal-content {
+            background: #0a0f4b;
+            color: var(--stone);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .modal .card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--stone);
+        }
+
+        .modal .text-muted {
+            color: #adb5bd !important;
+        }
+
+        .fleet-filters {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .fleet-filters .form-select,
+        .fleet-filters .form-control {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            color: #ffffff;
+        }
+
+        .fleet-filters .form-select option {
+            color: #000;
+        }
+
+        @media (max-width: 991px) {
+            .fleet-filters {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white d-flex align-items-center"
+            href="../pages/home.html">
+            Auto Carriers
+        </a>
+        <img src="../../public/images/Auto carriers  logo.jpg"
+            onerror="this.onerror=null;this.src='../../public/images/Auto%20carriers%20%20logo.jpg';"
+            class="brand-mark rounded mx-auto d-block" alt="Auto Carriers logo">
+
+        <div class="d-flex align-items-center gap-2 me-3">
+            <a href="../pages/home.html" class="btn btn-outline-light btn-sm">
+                <i class="fas fa-arrow-left me-1"></i>Back to Home
+            </a>
+            <a href="AC FLEET LIST JAN 26.xlsx" class="btn btn-success btn-sm" download>
+                <i class="fas fa-download me-1"></i>Download Inventory
+            </a>
+        </div>
+    </header>
+
+    <main class="page-shell">
+        <section class="page-hero">
+            <span class="badge">RTMS Fleet Inventory</span>
+            <h1>Vehicle registry and operational details</h1>
+            <p>View fleet units, core operational status, and detailed horse/trailer specifications in one RTMS
+                inventory page.</p>
+        </section>
+
+        <section class="insights-grid fleet-stats" aria-label="Fleet inventory summary">
+            <article class="stat-card text-center">
+                <p class="stat-label">Total vehicles</p>
+                <p class="stat-value" id="total-vehicles">-</p>
+                <p class="stat-note">Registered units</p>
+            </article>
+            <article class="stat-card text-center">
+                <p class="stat-label">Active fleet</p>
+                <p class="stat-value" id="active-vehicles">-</p>
+                <p class="stat-note">Operational status</p>
+            </article>
+            <article class="stat-card text-center">
+                <p class="stat-label">Licence expiring soon</p>
+                <p class="stat-value" id="upcoming-coc">-</p>
+                <p class="stat-note">Next 60 days</p>
+            </article>
+        </section>
+
+        <section class="data-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Fleet cards</p>
+                    <h2 class="fleet-title">Fleet inventory</h2>
+                    <p>Select a vehicle to view full horse, trailer and operational details.</p>
+                </div>
+                <div class="panel-actions">
+                    <span class="badge bg-light text-dark"><i class="fas fa-truck me-1"></i>Fleet Registry</span>
+                    <span class="badge badge-rtms"><i class="fas fa-shield-alt me-1"></i>RTMS Compliant</span>
+                </div>
+            </div>
+
+            <div class="fleet-filters" aria-label="Fleet filters">
+                <input type="search" id="fleet-search" class="form-control"
+                    placeholder="Search fleet, registration, make">
+                <select id="fleet-status-filter" class="form-select" aria-label="Filter by status">
+                    <option value="all">All statuses</option>
+                    <option value="active">Active only</option>
+                    <option value="inactive">Non-active</option>
+                </select>
+                <select id="fleet-cof-filter" class="form-select" aria-label="Filter by licence expiry">
+                    <option value="all">All licence dates</option>
+                    <option value="due60">Licence expiring in 60 days</option>
+                    <option value="expired">Licence expired</option>
+                </select>
+                <select id="fleet-sort" class="form-select" aria-label="Sort fleet cards">
+                    <option value="fleet-asc">Sort: Fleet A-Z</option>
+                    <option value="fleet-desc">Sort: Fleet Z-A</option>
+                    <option value="cof-asc">Sort: Nearest licence expiry</option>
+                </select>
+            </div>
+
+            <div id="cards-loading" class="rtms-spinner-wrap">
+                <div class="spinner-border text-light" role="status">
+                    <span class="visually-hidden">Loading fleet information...</span>
+                </div>
+                <p class="mt-2 text-muted">Loading vehicle inventory data...</p>
+            </div>
+            <div id="cards-container" class="row"></div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+    <script>
+        let fleetData = [];
+
+        function getValue(record, ...keys) {
+            for (const key of keys) {
+                const value = record?.[key];
+                if (value !== undefined && value !== null && String(value).trim() !== "") {
+                    return String(value).trim();
+                }
+            }
+            return "";
+        }
+
+        function formatWeight(value) {
+            if (!value) return "N/A";
+            const numeric = Number(String(value).replace(/[^0-9.-]/g, ""));
+            return Number.isFinite(numeric) ? `${numeric.toLocaleString()} kg` : value;
+        }
+
+        function parseDdMmYyyy(dateText) {
+            if (!dateText) return null;
+            const [day, month, year] = String(dateText).split("/").map((part) => Number(part));
+            if (!day || !month || !year) return null;
+            const parsed = new Date(year, month - 1, day);
+            return Number.isNaN(parsed.getTime()) ? null : parsed;
+        }
+
+        function isWithinDays(dateText, daysAhead) {
+            const targetDate = parseDdMmYyyy(dateText);
+            if (!targetDate) return false;
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            const maxDate = new Date(now);
+            maxDate.setDate(maxDate.getDate() + daysAhead);
+            return targetDate >= now && targetDate <= maxDate;
+        }
+
+        function isExpired(dateText) {
+            const targetDate = parseDdMmYyyy(dateText);
+            if (!targetDate) return false;
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            return targetDate < now;
+        }
+
+        function getFleetNo(vehicle) {
+            return getValue(vehicle, "truckFleetNo", "HORSE FLEET", "TRUCK FLEET NO.") || "N/A";
+        }
+
+        function getNextCofDate(vehicle) {
+            const dates = [
+                parseDdMmYyyy(getValue(vehicle, "truckCofExpiry", "TRUCK COF EXPIRY", " TRUCK COF EXPIRY ")),
+                parseDdMmYyyy(getValue(vehicle, "trailerCofExpiry", "TRAILER COF EXPIRY"))
+            ].filter(Boolean);
+            if (dates.length === 0) return null;
+            dates.sort((a, b) => a - b);
+            return dates[0];
+        }
+
+        function sortFleetData(records, sortBy) {
+            const sorted = [...records];
+            if (sortBy === "fleet-desc") {
+                sorted.sort((a, b) => getFleetNo(b).localeCompare(getFleetNo(a), undefined, { numeric: true }));
+                return sorted;
+            }
+            if (sortBy === "cof-asc") {
+                sorted.sort((a, b) => {
+                    const dateA = getNextCofDate(a);
+                    const dateB = getNextCofDate(b);
+                    const tsA = dateA ? dateA.getTime() : Number.POSITIVE_INFINITY;
+                    const tsB = dateB ? dateB.getTime() : Number.POSITIVE_INFINITY;
+                    return tsA - tsB;
+                });
+                return sorted;
+            }
+            sorted.sort((a, b) => getFleetNo(a).localeCompare(getFleetNo(b), undefined, { numeric: true }));
+            return sorted;
+        }
+
+        function applyFleetFilters() {
+            const searchInput = document.getElementById("fleet-search");
+            const statusInput = document.getElementById("fleet-status-filter");
+            const cofInput = document.getElementById("fleet-cof-filter");
+            const sortInput = document.getElementById("fleet-sort");
+
+            const searchQuery = (searchInput?.value || "").trim().toLowerCase();
+            const statusFilter = statusInput?.value || "all";
+            const cofFilter = cofInput?.value || "all";
+            const sortBy = sortInput?.value || "fleet-asc";
+
+            let filtered = fleetData.filter((vehicle) => {
+                const statusText = getValue(vehicle, "status", "STATUS") || "Unknown";
+                const statusLower = statusText.toLowerCase();
+
+                if (statusFilter === "active" && statusLower !== "active") {
+                    return false;
+                }
+                if (statusFilter === "inactive" && statusLower === "active") {
+                    return false;
+                }
+
+                const truckCof = getValue(vehicle, "truckCofExpiry", "TRUCK COF EXPIRY", " TRUCK COF EXPIRY ");
+                const trailerCof = getValue(vehicle, "trailerCofExpiry", "TRAILER COF EXPIRY");
+                const dueSoon = isWithinDays(truckCof, 60) || isWithinDays(trailerCof, 60);
+                const expired = isExpired(truckCof) || isExpired(trailerCof);
+
+                if (cofFilter === "due60" && !dueSoon) {
+                    return false;
+                }
+                if (cofFilter === "expired" && !expired) {
+                    return false;
+                }
+
+                if (!searchQuery) {
+                    return true;
+                }
+
+                const searchBlob = [
+                    getFleetNo(vehicle),
+                    getValue(vehicle, "truckRegistration", "HORSE REGISTRATION", "TRUCK REGISTRATION"),
+                    getValue(vehicle, "truckMake", "HORSE MAKE", "TRUCK MAKE"),
+                    getValue(vehicle, "trailerMake", "TRAILER MAKE"),
+                    getValue(vehicle, "trailerRegistration", "TRAILER REGISTRATION"),
+                    statusText
+                ].join(" ").toLowerCase();
+
+                return searchBlob.includes(searchQuery);
+            });
+
+            filtered = sortFleetData(filtered, sortBy);
+            displayFleetCards(filtered);
+        }
+
+        function wireFleetFilters() {
+            const controls = [
+                { id: "fleet-search", event: "input" },
+                { id: "fleet-status-filter", event: "change" },
+                { id: "fleet-cof-filter", event: "change" },
+                { id: "fleet-sort", event: "change" }
+            ];
+
+            controls.forEach(({ id, event }) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener(event, applyFleetFilters);
+                }
+            });
+        }
+
+        async function loadFleetData() {
+            const dataSources = ["AC_Fleet_List_JAN_26_61_Objects.json", "fleet-data.json"];
+            try {
+                let lastError = null;
+
+                for (const source of dataSources) {
+                    try {
+                        const response = await fetch(source);
+                        if (!response.ok) {
+                            continue;
+                        }
+
+                        const data = await response.json();
+                        if (Array.isArray(data)) {
+                            fleetData = data;
+                            initializePage();
+                            return;
+                        }
+                    } catch (sourceError) {
+                        lastError = sourceError;
+                    }
+                }
+
+                throw lastError || new Error("No valid fleet data source available.");
+            } catch (error) {
+                console.error("Error loading fleet data:", error);
+                document.getElementById("cards-container").innerHTML =
+                    '<div class="col-12"><div class="rtms-error">Error loading fleet data. Please refresh the page.</div></div>';
+            }
+        }
+
+        function displayFleetCards(data) {
+            const loading = document.getElementById("cards-loading");
+            const container = document.getElementById("cards-container");
+
+            if (loading) loading.remove();
+
+            if (!data || data.length === 0) {
+                container.innerHTML = '<div class="col-12"><div class="rtms-empty">No fleet data available.</div></div>';
+                updateFleetStatistics(0, 0, 0);
+                return;
+            }
+
+            let totalVehicles = data.length;
+            let activeVehicles = 0;
+            let upcomingCoc = 0;
+
+            container.innerHTML = "";
+
+            data.forEach((vehicle) => {
+                try {
+                    const card = document.createElement("div");
+                    card.className = "col-md-4 mb-4";
+
+                    const fleetNo = getValue(vehicle, "truckFleetNo", "HORSE FLEET", "TRUCK FLEET NO.") || "N/A";
+                    const truckMake = getValue(vehicle, "truckMake", "HORSE MAKE", "TRUCK MAKE") || "N/A";
+                    const truckRegistration = getValue(vehicle, "truckRegistration", "HORSE REGISTRATION", "TRUCK REGISTRATION") || "N/A";
+                    const trailerMake = getValue(vehicle, "trailerMake", "TRAILER MAKE") || "N/A";
+                    const statusText = getValue(vehicle, "status", "STATUS") || "Unknown";
+                    const statusLower = statusText.toLowerCase();
+                    const statusClass = statusLower === "active" ? "bg-success" : "bg-warning text-dark";
+
+                    if (statusLower === "active") {
+                        activeVehicles += 1;
+                    }
+
+                    const truckCofExpiry = getValue(vehicle, "truckCofExpiry", "TRUCK COF EXPIRY", " TRUCK COF EXPIRY ");
+                    const trailerCofExpiry = getValue(vehicle, "trailerCofExpiry", "TRAILER COF EXPIRY");
+                    if (isWithinDays(truckCofExpiry, 60) || isWithinDays(trailerCofExpiry, 60)) {
+                        upcomingCoc += 1;
+                    }
+
+                    card.innerHTML = `
+                        <div class="card h-100 fleet-card">
+                            <img src="Volvo.avif"
+                                 class="card-img-top"
+                                 alt="Vehicle ${fleetNo}"
+                                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGVkZWRlIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title fleet-icon mb-2">
+                                    <i class="fas fa-truck me-2"></i>Fleet ${fleetNo}
+                                </h5>
+                                <p class="card-text flex-grow-1">
+                                    <strong>Horse:</strong> ${truckMake}<br>
+                                    <strong>Reg:</strong> ${truckRegistration}<br>
+                                    <strong>Trailer:</strong> ${trailerMake}<br>
+                                    <strong>Status:</strong> ${statusText}
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center mt-auto">
+                                    <span class="badge ${statusClass}">${statusText}</span>
+                                    <button type="button" class="btn btn-outline-light btn-sm" onclick="showVehicleDetails('${fleetNo}')">
+                                        <i class="fas fa-eye me-1"></i>View Details
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    container.appendChild(card);
+                } catch (error) {
+                    console.error("Error creating card for vehicle:", error);
+                }
+            });
+
+            updateFleetStatistics(totalVehicles, activeVehicles, upcomingCoc);
+        }
+
+        function updateFleetStatistics(total, active, cocDue) {
+            const totalElement = document.getElementById("total-vehicles");
+            const activeElement = document.getElementById("active-vehicles");
+            const cocElement = document.getElementById("upcoming-coc");
+
+            if (totalElement) totalElement.textContent = total;
+            if (activeElement) activeElement.textContent = active;
+            if (cocElement) cocElement.textContent = cocDue;
+        }
+
+        function showVehicleDetails(fleetNumber) {
+            const vehicle = fleetData.find((v) =>
+                getValue(v, "truckFleetNo", "HORSE FLEET", "TRUCK FLEET NO.") === fleetNumber
+            );
+            if (!vehicle) {
+                console.error("Vehicle not found:", fleetNumber);
+                return;
+            }
+
+            const truckFleetNo = getValue(vehicle, "truckFleetNo", "HORSE FLEET", "TRUCK FLEET NO.") || "N/A";
+            const truckRegistration = getValue(vehicle, "truckRegistration", "HORSE REGISTRATION", "TRUCK REGISTRATION") || "N/A";
+            const truckMake = getValue(vehicle, "truckMake", "HORSE MAKE", "TRUCK MAKE") || "N/A";
+            const modelDerivative = getValue(vehicle, "modelDerivative", "MODEL DERIVATIVE");
+            const truckYear = getValue(vehicle, "truckYearModel", "HORSE YEAR MODEL", "TRUCK YEAR MODEL") || "N/A";
+            const truckVin = getValue(vehicle, "truckVinNo", "HORSE CHASSIS", "TRUCK VIN NO.") || "N/A";
+            const truckGvm = formatWeight(getValue(vehicle, "truckGvm", "HORSE GVM", "TRUCK GVM3", " TRUCK GVM3 "));
+            const truckTare = formatWeight(getValue(vehicle, "truckTare", "HORSE TARE", "TRUCK TARE2"));
+            const tankSize = getValue(vehicle, "tankSize", "FUEL CAPACITY", "Tank Size") || "N/A";
+            const axleConfiguration = getValue(vehicle, "axleConfiguration", "Number of Axles", "AXLE CONFIGURATION2") || "N/A";
+            const engineNo = getValue(vehicle, "engineNo", "Engine number", "Engine No. ") || "N/A";
+
+            const trailerRegistration = getValue(vehicle, "trailerRegistration", "TRAILER REGISTRATION") || "N/A";
+            const trailerMake = getValue(vehicle, "trailerMake", "TRAILER MAKE") || "N/A";
+            const trailerModel = getValue(vehicle, "trailerModel", "TRAILER MODEL");
+            const trailerYear = getValue(vehicle, "trailerYearModel", "TRAILER YEAR MODEL") || "N/A";
+            const trailerVin = getValue(vehicle, "trailerVin", "TRAILER CHASSIS", "TRAILER VIN") || "N/A";
+            const trailerGvm = formatWeight(getValue(vehicle, "trailerGvm", "TRAILER GVM"));
+            const trailerTare = formatWeight(getValue(vehicle, "trailerTare", "TRAILER TARE"));
+            const trailerCapacity = getValue(vehicle, "trailerCapacity", "TRAILER CAPACITY") || "N/A";
+            const pbsType = getValue(vehicle, "pbsOrNonPbs", "PBS Approved", "PBS/NON PBS") || "N/A";
+            const pbsId = getValue(vehicle, "pbsId", "PBS ID");
+
+            const status = getValue(vehicle, "status", "STATUS") || "Active";
+            const tracking = getValue(vehicle, "tracking", "TRACKING") || "N/A";
+            const recovery = getValue(vehicle, "recovery", "RECOVERY") || "N/A";
+            const truckMaintenance = getValue(vehicle, "truckMaintenance", "TRUCK MAINTENANCE") || "N/A";
+            const trailerMaintenance = getValue(vehicle, "trailerMaintenance", "TRAILER MAINTENANCE") || "N/A";
+            const truckLicenceExpiry = getValue(vehicle, "truckLicenceExpiry", "TRUCK LICENCE EXPIRY", " TRUCK LICENCE EXPIRY ") || "N/A";
+            const trailerLicenceExpiry = getValue(vehicle, "trailerLicenceExpiry", "TRAILER LICENCE EXPIRY") || "N/A";
+            const trailerFleetNo = getValue(vehicle, "trailerFleetNo", "TRAILER FLEET", "TRAILER FLEET NO.") || "N/A";
+
+            document.getElementById("modalVehicleImage").src = "Volvo.avif";
+            document.getElementById("modalVehicleImage").alt = `Vehicle ${truckFleetNo}`;
+            document.getElementById("modalFleetNumber").textContent = truckFleetNo;
+            document.getElementById("modalStatus").textContent = status;
+            document.getElementById("modalStatus").className = `badge ${status.toLowerCase() === "active" ? "bg-success" : "bg-warning text-dark"}`;
+
+            document.getElementById("modalHorseReg").textContent = truckRegistration;
+            document.getElementById("modalHorseMake").textContent = `${truckMake}${modelDerivative ? ` (${modelDerivative})` : ""}`;
+            document.getElementById("modalHorseYear").textContent = truckYear;
+            document.getElementById("modalHorseChassis").textContent = truckVin;
+            document.getElementById("modalHorseGVM").textContent = truckGvm;
+            document.getElementById("modalHorseTare").textContent = truckTare;
+            document.getElementById("modalFuelCapacity").textContent = tankSize;
+            document.getElementById("modalAxles").textContent = axleConfiguration;
+            document.getElementById("modalEngineNumber").textContent = engineNo;
+
+            document.getElementById("modalTrailerReg").textContent = trailerRegistration;
+            document.getElementById("modalTrailerMake").textContent = `${trailerMake}${trailerModel ? ` (${trailerModel})` : ""}`;
+            document.getElementById("modalTrailerYear").textContent = trailerYear;
+            document.getElementById("modalTrailerChassis").textContent = trailerVin;
+            document.getElementById("modalTrailerGVM").textContent = trailerGvm;
+            document.getElementById("modalTrailerTare").textContent = trailerTare;
+            document.getElementById("modalTrailerAxles").textContent = axleConfiguration;
+            document.getElementById("modalTrailerCapacity").textContent = trailerCapacity;
+            document.getElementById("modalMaxHeight").textContent = "N/A";
+            document.getElementById("modalMaxLength").textContent = "N/A";
+            document.getElementById("modalPBSApproved").textContent = pbsId ? `${pbsType} (${pbsId})` : pbsType;
+
+            document.getElementById("modalOperationalStatus").textContent = status;
+            document.getElementById("modalDieselCard").textContent = "YES";
+            document.getElementById("modalTracking").textContent = tracking;
+            document.getElementById("modalInsurance").textContent = "SKSF";
+            document.getElementById("modalETag").textContent = "YES";
+            document.getElementById("modalTruckLicenceExpiry").textContent = truckLicenceExpiry;
+            document.getElementById("modalTrailerLicenceExpiry").textContent = trailerLicenceExpiry;
+
+            document.getElementById("modalHorseFleet").textContent = truckFleetNo;
+            document.getElementById("modalTrailerFleet").textContent = trailerFleetNo;
+
+            new bootstrap.Modal(document.getElementById("vehicleDetailsModal")).show();
+        }
+
+        function initializePage() {
+            wireFleetFilters();
+            applyFleetFilters();
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadFleetData();
+        });
+    </script>
+
+    <div class="modal fade" id="vehicleDetailsModal" tabindex="-1" aria-labelledby="vehicleDetailsModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header text-white" style="background: linear-gradient(120deg, #6f94ff, #010065);">
+                    <h5 class="modal-title" id="vehicleDetailsModalLabel">
+                        <i class="fas fa-truck me-2"></i>Fleet Vehicle Details
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100">
+                                <img id="modalVehicleImage" src="" class="card-img-top" alt="Vehicle Image"
+                                    style="height: 250px; object-fit: cover;"
+                                    onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGVkZWRlIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNiIgZmlsbD0iIzk5OTk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';">
+                                <div class="card-body text-center">
+                                    <h4 class="card-title fleet-title fw-bold mb-2">Fleet <span
+                                            id="modalFleetNumber"></span></h4>
+                                    <span id="modalStatus" class="badge bg-success fs-6"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <div class="card h-100 border-primary">
+                                        <div class="card-header bg-primary text-white">
+                                            <h6 class="mb-0"><i class="fas fa-truck me-2"></i>Horse Details</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-2">
+                                                <div class="col-12 mb-2"><small class="text-muted">Registration:</small>
+                                                    <div class="fw-bold" id="modalHorseReg">-</div>
+                                                </div>
+                                                <div class="col-12 mb-2"><small class="text-muted">Make & Model:</small>
+                                                    <div class="fw-bold" id="modalHorseMake">-</div>
+                                                </div>
+                                                <div class="col-6 mb-2"><small class="text-muted">Year:</small>
+                                                    <div class="fw-bold" id="modalHorseYear">-</div>
+                                                </div>
+                                                <div class="col-6 mb-2"><small class="text-muted">Axles:</small>
+                                                    <div class="fw-bold" id="modalAxles">-</div>
+                                                </div>
+                                                <div class="col-12 mb-2"><small class="text-muted">Chassis
+                                                        Number:</small>
+                                                    <div class="fw-bold small" id="modalHorseChassis">-</div>
+                                                </div>
+                                                <div class="col-6 mb-2"><small class="text-muted">GVM:</small>
+                                                    <div class="fw-bold" id="modalHorseGVM">-</div>
+                                                </div>
+                                                <div class="col-6 mb-2"><small class="text-muted">Tare:</small>
+                                                    <div class="fw-bold" id="modalHorseTare">-</div>
+                                                </div>
+                                                <div class="col-6 mb-2"><small class="text-muted">Fuel Capacity:</small>
+                                                    <div class="fw-bold" id="modalFuelCapacity">-</div>
+                                                </div>
+                                                <div class="col-6"><small class="text-muted">Engine:</small>
+                                                    <div class="fw-bold small" id="modalEngineNumber">-</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-4">
+                                    <div class="card h-100 border-success">
+                                        <div class="card-header bg-success text-white">
+                                            <h6 class="mb-0"><i class="fas fa-trailer me-2"></i>Trailer Details</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-2">
+                                                <div class="col-12 mb-2"><small class="text-muted">Registration:</small>
+                                                    <div class="fw-bold" id="modalTrailerReg">-</div>
+                                                </div>
+                                                <div class="col-12 mb-2"><small class="text-muted">Make & Model:</small>
+                                                    <div class="fw-bold" id="modalTrailerMake">-</div>
+                                                </div>
+                                                <div class="col-6 mb-2"><small class="text-muted">Year:</small>
+                                                    <div class="fw-bold" id="modalTrailerYear">-</div>
+                                                </div>
+                                                <div class="col-6 mb-2"><small class="text-muted">PBS Approved:</small>
+                                                    <div class="fw-bold" id="modalPBSApproved">-</div>
+                                                </div>
+                                                <div class="col-12 mb-2"><small class="text-muted">Chassis
+                                                        Number:</small>
+                                                    <div class="fw-bold small" id="modalTrailerChassis">-</div>
+                                                </div>
+                                                <div class="col-12 mb-2"><small class="text-muted">GVM:</small>
+                                                    <div class="fw-bold" id="modalTrailerGVM">-</div>
+                                                </div>
+                                                <div class="col-6 mb-2"><small class="text-muted">Tare:</small>
+                                                    <div class="fw-bold" id="modalTrailerTare">-</div>
+                                                </div>
+                                                <div class="col-6 mb-2"><small class="text-muted">Axles:</small>
+                                                    <div class="fw-bold" id="modalTrailerAxles">-</div>
+                                                </div>
+                                                <div class="col-6 mb-2"><small class="text-muted">Capacity:</small>
+                                                    <div class="fw-bold" id="modalTrailerCapacity">-</div>
+                                                </div>
+                                                <div class="col-6 mb-2"><small class="text-muted">Max Height:</small>
+                                                    <div class="fw-bold" id="modalMaxHeight">-</div>
+                                                </div>
+                                                <div class="col-12"><small class="text-muted">Max Length:</small>
+                                                    <div class="fw-bold" id="modalMaxLength">-</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-4">
+                                    <div class="card border-warning">
+                                        <div class="card-header bg-warning text-dark">
+                                            <h6 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i>Operational
+                                                Information</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-2">
+                                                <div class="col-12 mb-2"><small class="text-muted">Status:</small>
+                                                    <div class="fw-bold text-success" id="modalOperationalStatus">Active
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 mb-2"><small class="text-muted">Truck
+                                                        Maintenance:</small>
+                                                    <div class="fw-bold">NS Repairs</div>
+                                                </div>
+                                                <div class="col-6 mb-2"><small class="text-muted">Diesel Card:</small>
+                                                    <div class="fw-bold" id="modalDieselCard">-</div>
+                                                </div>
+                                                <div class="col-6 mb-2"><small class="text-muted">Tracking:</small>
+                                                    <div class="fw-bold" id="modalTracking">-</div>
+                                                </div>
+                                                <div class="col-6 mb-2"><small class="text-muted">Insurance:</small>
+                                                    <div class="fw-bold" id="modalInsurance">-</div>
+                                                </div>
+                                                <div class="col-6"><small class="text-muted">E-Tag:</small>
+                                                    <div class="fw-bold" id="modalETag">-</div>
+                                                </div>
+                                                <div class="col-6 mb-2"><small class="text-muted">Truck Licence
+                                                        Expiry:</small>
+                                                    <div class="fw-bold" id="modalTruckLicenceExpiry">-</div>
+                                                </div>
+                                                <div class="col-6 mb-2"><small class="text-muted">Trailer Licence
+                                                        Expiry:</small>
+                                                    <div class="fw-bold" id="modalTrailerLicenceExpiry">-</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="card border-info">
+                                        <div class="card-header bg-info text-white">
+                                            <h6 class="mb-0"><i class="fas fa-id-card me-2"></i>Fleet Identification
+                                            </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-2">
+                                                <div class="col-6 mb-2"><small class="text-muted">Horse Fleet:</small>
+                                                    <div class="fw-bold fs-5" id="modalHorseFleet">-</div>
+                                                </div>
+                                                <div class="col-6 mb-2"><small class="text-muted">Trailer Fleet:</small>
+                                                    <div class="fw-bold fs-5" id="modalTrailerFleet">-</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

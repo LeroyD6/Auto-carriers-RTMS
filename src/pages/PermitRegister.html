@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="RTMS permit register with live days-to-expiry countdown.">
+    <title>Permit Register | Auto Carriers RTMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link href="../styles/dashboard.css" rel="stylesheet">
+    <style>
+        .permit-shell {
+            max-width: 100%;
+            padding-left: clamp(0.6rem, 2vw, 1.5rem);
+            padding-right: clamp(0.6rem, 2vw, 1.5rem);
+        }
+
+        .permit-table-wrapper {
+            overflow: auto;
+            max-height: 70vh;
+        }
+
+        .permit-table th,
+        .permit-table td {
+            min-width: 180px;
+            white-space: normal;
+            vertical-align: top;
+        }
+
+        .permit-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: rgba(10, 15, 75, 0.98);
+        }
+
+        .permit-table th:first-child,
+        .permit-table td:first-child {
+            min-width: 120px;
+            position: sticky;
+            left: 0;
+            z-index: 1;
+            background: rgba(10, 15, 75, 0.95);
+        }
+
+        .permit-table thead th:first-child {
+            z-index: 3;
+        }
+
+        .permit-date {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .permit-days {
+            font-size: 0.75rem;
+            letter-spacing: 0.02em;
+        }
+
+        .summary-note {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-top: 0.8rem;
+        }
+
+        .permit-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .permit-controls .table-search,
+        .permit-controls .form-select {
+            min-width: 240px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            color: #fff;
+        }
+
+        .permit-controls .form-select option {
+            color: #000;
+        }
+
+        .scroll-hint {
+            color: var(--muted);
+            font-size: 0.82rem;
+            margin-top: 0.45rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="navbar sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3 fs-6 text-white d-flex align-items-center" href="home.html">
+            Auto Carriers
+        </a>
+        <img src="../../public/images/Auto carriers  logo.jpg"
+            onerror="this.onerror=null;this.src='../../public/images/Auto%20carriers%20%20logo.jpg';"
+            class="brand-mark rounded mx-auto d-block" alt="Auto Carriers logo">
+
+        <div class="d-flex align-items-center gap-2 me-3">
+            <a class="btn btn-outline-light btn-sm" href="home.html">Back to control tower</a>
+        </div>
+    </header>
+
+    <main class="page-shell permit-shell">
+        <section class="page-hero">
+            <span class="badge">RTMS Permit Register</span>
+            <h1>Permit expiry monitoring</h1>
+            <div class="hero-actions">
+                <a class="btn btn-success" href="../../public/data/Permit Register.xlsx" download>Download Excel file
+                </a>
+                <button class="btn btn-outline-light" type="button" id="refresh-permits">Refresh now</button>
+            </div>
+        </section>
+
+        <section class="insights-grid" aria-label="Permit register summary">
+            <article class="stat-card text-center">
+                <p class="stat-label">Fleet records</p>
+                <p class="stat-value" id="stat-fleet-total">--</p>
+                <p class="stat-note">Rows loaded from register</p>
+            </article>
+            <article class="stat-card text-center">
+                <p class="stat-label">Expired permits</p>
+                <p class="stat-value" id="stat-expired">--</p>
+                <p class="stat-note">Past expiry date</p>
+            </article>
+            <article class="stat-card text-center">
+                <p class="stat-label">Due within 30 days</p>
+                <p class="stat-value" id="stat-due-30">--</p>
+                <p class="stat-note">Immediate action window</p>
+            </article>
+            <article class="stat-card text-center">
+                <p class="stat-label">Last recalculated</p>
+                <p class="stat-value" id="stat-recalculated">--</p>
+                <p class="stat-note">Auto-updates daily</p>
+            </article>
+        </section>
+
+        <section class="data-panel" id="permit-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="eyebrow">Permit matrix</p>
+                    <h2>Live permit countdowns</h2>
+                    <p>Search by fleet number or permit type. Each permit cell shows the expiry date and live days left.
+                    </p>
+                </div>
+                <div class="permit-controls">
+                    <input type="search" id="permit-search" class="table-search"
+                        placeholder="Search fleet number or permit text">
+                    <select id="permit-filter" class="form-select" aria-label="Permit row filter">
+                        <option value="all">All fleets</option>
+                        <option value="overdue">Has overdue permit</option>
+                        <option value="due30">Has permit due in 30 days</option>
+                        <option value="nodate">No valid permit dates</option>
+                    </select>
+                    <select id="permit-type-filter" class="form-select" aria-label="Filter by permit type">
+                        <option value="all">All permit types</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="permit-table-wrapper doc-table-wrapper">
+                <table class="doc-table permit-table" id="permit-table">
+                    <thead>
+                        <tr id="permit-header-row"></tr>
+                    </thead>
+                    <tbody id="permit-table-body"></tbody>
+                </table>
+            </div>
+            <p class="scroll-hint">Tip: Scroll horizontally to view all permit types. The first column and header
+                stay fixed.</p>
+            <p class="summary-note" id="permit-summary-note">Loading permit register...</p>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+        crossorigin="anonymous"></script>
+    <script src="../scripts/core/pages.js"></script>
+    <script>
+        const csvPath = "../../public/data/Permit Register.csv";
+        const state = {
+            permitColumns: [],
+            rows: [],
+            activeFilter: "all",
+            searchQuery: "",
+            selectedPermitType: "all"
+        };
+        let dailyRefreshHandle = null;
+        let midnightTimeoutHandle = null;
+
+        function normalizeDate(date) {
+            const normalized = new Date(date);
+            normalized.setHours(0, 0, 0, 0);
+            return normalized;
+        }
+
+        function parseDateValue(rawValue) {
+            if (!rawValue) return null;
+            const value = String(rawValue).trim();
+            if (!value || /^(n\/a|yes|waiting trailer|#value!|0)$/i.test(value)) return null;
+
+            const slashMatch = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+            if (slashMatch) {
+                const day = Number(slashMatch[1]);
+                const month = Number(slashMatch[2]);
+                let year = Number(slashMatch[3]);
+                if (year < 100) year += 2000;
+                const parsedSlash = new Date(year, month - 1, day);
+                return Number.isNaN(parsedSlash.getTime()) ? null : normalizeDate(parsedSlash);
+            }
+
+            const parsed = new Date(value);
+            if (Number.isNaN(parsed.getTime())) return null;
+            return normalizeDate(parsed);
+        }
+
+        function daysUntil(expiryDate, baseDate) {
+            const diffMs = expiryDate.getTime() - baseDate.getTime();
+            return Math.floor(diffMs / 86400000);
+        }
+
+        function csvToRows(csvText) {
+            return csvText
+                .split(/\r?\n/)
+                .map((line) => line.split(",").map((cell) => cell.trim()));
+        }
+
+        function extractRegisterData(csvRows) {
+            const headerIndex = csvRows.findIndex((row) =>
+                row.some((cell) => String(cell).toUpperCase() === "FLEET NUMBER")
+            );
+
+            if (headerIndex < 0) {
+                throw new Error("Could not find permit register header row (FLEET NUMBER).");
+            }
+
+            const headerRow = csvRows[headerIndex];
+            const permitColumns = [];
+
+            for (let i = 1; i < headerRow.length; i += 2) {
+                const permitName = headerRow[i] ? headerRow[i].trim() : "";
+                if (!permitName || /^days left on permit$/i.test(permitName)) {
+                    continue;
+                }
+                permitColumns.push({
+                    name: permitName,
+                    dateIndex: i
+                });
+            }
+
+            const records = [];
+            for (let rowIndex = headerIndex + 1; rowIndex < csvRows.length; rowIndex += 1) {
+                const row = csvRows[rowIndex];
+                if (!row || row.length === 0) continue;
+                const fleetNumber = (row[0] || "").trim();
+                if (!fleetNumber) continue;
+
+                const permits = permitColumns.map((column) => {
+                    const rawDate = (row[column.dateIndex] || "").trim();
+                    return {
+                        permitName: column.name,
+                        rawDate,
+                        parsedDate: parseDateValue(rawDate)
+                    };
+                });
+
+                records.push({ fleetNumber, permits });
+            }
+
+            return { permitColumns, records };
+        }
+
+        function getBadgeClass(days) {
+            if (days < 0) return "text-bg-danger";
+            if (days <= 30) return "text-bg-warning";
+            if (days <= 60) return "text-bg-info";
+            return "text-bg-success";
+        }
+
+        function rowMatchesFilter(record, today) {
+            const scopedPermits = state.selectedPermitType === "all"
+                ? record.permits
+                : record.permits.filter((permit) => permit.permitName === state.selectedPermitType);
+
+            const daysList = scopedPermits
+                .filter((permit) => permit.parsedDate)
+                .map((permit) => daysUntil(permit.parsedDate, today));
+
+            if (state.activeFilter === "overdue") {
+                return daysList.some((days) => days < 0);
+            }
+
+            if (state.activeFilter === "due30") {
+                return daysList.some((days) => days >= 0 && days <= 30);
+            }
+
+            if (state.activeFilter === "nodate") {
+                return daysList.length === 0;
+            }
+
+            return true;
+        }
+
+        function populatePermitTypeOptions() {
+            const permitTypeSelect = document.getElementById("permit-type-filter");
+            if (!permitTypeSelect) return;
+
+            const currentValue = state.selectedPermitType || "all";
+            permitTypeSelect.innerHTML = '<option value="all">All permit types</option>';
+
+            state.permitColumns.forEach((column) => {
+                permitTypeSelect.insertAdjacentHTML(
+                    "beforeend",
+                    `<option value="${column.name.replace(/"/g, "&quot;")}">${column.name}</option>`
+                );
+            });
+
+            permitTypeSelect.value = state.permitColumns.some((column) => column.name === currentValue)
+                ? currentValue
+                : "all";
+            state.selectedPermitType = permitTypeSelect.value;
+        }
+
+        function rowMatchesSearch(record) {
+            const query = state.searchQuery.trim().toLowerCase();
+            if (!query) return true;
+
+            const permitText = record.permits
+                .map((permit) => `${permit.permitName} ${permit.rawDate}`)
+                .join(" ")
+                .toLowerCase();
+            return (`${record.fleetNumber} ${permitText}`).includes(query);
+        }
+
+        function renderTable() {
+            const headerRow = document.getElementById("permit-header-row");
+            const body = document.getElementById("permit-table-body");
+            const note = document.getElementById("permit-summary-note");
+            const today = normalizeDate(new Date());
+
+            headerRow.innerHTML = "";
+            body.innerHTML = "";
+
+            headerRow.insertAdjacentHTML("beforeend", "<th scope=\"col\">Fleet Number</th>");
+            state.permitColumns.forEach((column) => {
+                headerRow.insertAdjacentHTML("beforeend", `<th scope=\"col\">${column.name}</th>`);
+            });
+
+            let expiredCount = 0;
+            let dueIn30Count = 0;
+            let visibleRows = 0;
+
+            state.rows.forEach((record) => {
+                if (!rowMatchesFilter(record, today) || !rowMatchesSearch(record)) {
+                    return;
+                }
+
+                visibleRows += 1;
+                const tr = document.createElement("tr");
+                tr.insertAdjacentHTML("beforeend", `<td><strong>${record.fleetNumber}</strong></td>`);
+
+                record.permits.forEach((permit) => {
+                    if (!permit.parsedDate) {
+                        const fallbackText = permit.rawDate || "N/A";
+                        tr.insertAdjacentHTML(
+                            "beforeend",
+                            `<td><span class=\"permit-date\">${fallbackText}</span><span class=\"badge text-bg-secondary permit-days\">No date</span></td>`
+                        );
+                        return;
+                    }
+
+                    const daysLeft = daysUntil(permit.parsedDate, today);
+                    if (daysLeft < 0) expiredCount += 1;
+                    if (daysLeft >= 0 && daysLeft <= 30) dueIn30Count += 1;
+
+                    const badgeClass = getBadgeClass(daysLeft);
+                    const dayLabel = `${daysLeft} day${Math.abs(daysLeft) === 1 ? "" : "s"}`;
+                    const badgeText = daysLeft < 0 ? `${dayLabel} overdue` : `${dayLabel} left`;
+
+                    tr.insertAdjacentHTML(
+                        "beforeend",
+                        `<td><span class=\"permit-date\">${permit.rawDate}</span><span class=\"badge ${badgeClass} permit-days\">${badgeText}</span></td>`
+                    );
+                });
+
+                body.appendChild(tr);
+            });
+
+            document.getElementById("stat-fleet-total").textContent = state.rows.length;
+            document.getElementById("stat-expired").textContent = expiredCount;
+            document.getElementById("stat-due-30").textContent = dueIn30Count;
+            document.getElementById("stat-recalculated").textContent = today.toLocaleDateString("en-ZA", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric"
+            });
+
+            note.textContent = `Showing ${visibleRows} of ${state.rows.length} fleet rows across ${state.permitColumns.length} permit columns. Daily countdown recalculated from current date.`;
+        }
+
+        function scheduleMidnightRefresh() {
+            if (midnightTimeoutHandle) {
+                clearTimeout(midnightTimeoutHandle);
+                midnightTimeoutHandle = null;
+            }
+            if (dailyRefreshHandle) {
+                clearInterval(dailyRefreshHandle);
+                dailyRefreshHandle = null;
+            }
+
+            const now = new Date();
+            const nextMidnight = new Date(now);
+            nextMidnight.setHours(24, 0, 2, 0);
+            const waitMs = nextMidnight.getTime() - now.getTime();
+
+            midnightTimeoutHandle = setTimeout(() => {
+                renderTable();
+                dailyRefreshHandle = setInterval(renderTable, 86400000);
+            }, Math.max(waitMs, 1000));
+        }
+
+        async function loadPermitRegister() {
+            const note = document.getElementById("permit-summary-note");
+            try {
+                const response = await fetch(csvPath, { cache: "no-store" });
+                if (!response.ok) {
+                    throw new Error(`Unable to load Permit Register CSV (${response.status})`);
+                }
+
+                const csvText = await response.text();
+                const csvRows = csvToRows(csvText);
+                const parsed = extractRegisterData(csvRows);
+
+                state.permitColumns = parsed.permitColumns;
+                state.rows = parsed.records;
+                populatePermitTypeOptions();
+                renderTable();
+                scheduleMidnightRefresh();
+            } catch (error) {
+                console.error(error);
+                note.textContent = "Unable to load permit register data. Please verify the CSV format and try again.";
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const refreshButton = document.getElementById("refresh-permits");
+            const searchInput = document.getElementById("permit-search");
+            const filterSelect = document.getElementById("permit-filter");
+            const permitTypeSelect = document.getElementById("permit-type-filter");
+
+            if (refreshButton) {
+                refreshButton.addEventListener("click", () => {
+                    loadPermitRegister();
+                });
+            }
+
+            if (searchInput) {
+                searchInput.addEventListener("input", () => {
+                    state.searchQuery = searchInput.value || "";
+                    renderTable();
+                });
+            }
+
+            if (filterSelect) {
+                filterSelect.addEventListener("change", () => {
+                    state.activeFilter = filterSelect.value || "all";
+                    renderTable();
+                });
+            }
+
+            if (permitTypeSelect) {
+                permitTypeSelect.addEventListener("change", () => {
+                    state.selectedPermitType = permitTypeSelect.value || "all";
+                    renderTable();
+                });
+            }
+
+            loadPermitRegister();
+        });
+    </script>
+</body>
+
+</html>

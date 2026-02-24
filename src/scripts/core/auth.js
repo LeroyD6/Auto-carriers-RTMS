@@ -1,6 +1,6 @@
 (function () {
-  const AUTH_KEY = "kdgAuthSession";
-  const VALID_EMAIL = "leroy@kdglogistics.com";
+  const AUTH_KEY = "autoCarriersAuthSession";
+  const VALID_EMAIL = "rtms@autocarriers.co.za";
   const VALID_PASSWORD = "admin";
   const LOGIN_PAGE = "index.html";
   const HOME_PAGE = "home.html";

@@ -4,8 +4,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Access the ISO 14001 control tower and evidence packs.">
-    <title>Control Tower Sign in</title>
+    <meta name="description" content="Access the RTMS control tower and evidence packs.">
+    <title>Auto Carriers RTMS | Sign in</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <link href="../styles/Signin.css" rel="stylesheet">
@@ -14,9 +14,9 @@
 <body class="auth-body" data-page="login">
     <main class="auth-shell">
         <section class="auth-copy">
-            <span class="badge">KDG logistics</span>
-            <h1>ISO 14001 control tower</h1>
-            <p>Sign in to view carbon dashboards, waste logs, SOPs, corrective actions, and audit-ready evidence in one
+            <span class="badge">Auto Carriers</span>
+            <h1>RTMS control tower</h1>
+            <p>Sign in to view carbon dashboards, SOPs, corrective actions, and audit-ready evidence in one
                 cockpit.</p>
             <ul class="auth-highlights">
                 <li>Encrypted access to live dashboards</li>
@@ -26,8 +26,9 @@
         </section>
         <section class="auth-card" aria-label="Sign in panel">
             <form class="form-signin" aria-describedby="signin-footnote" data-login-form>
-                <img class="auth-logo" src="../../public/images/kdg logo small.png" alt="KDG Logistics logo" width="280"
-                    height="92">
+                <img class="auth-logo" src="../../public/images/Auto carriers  logo.jpg"
+                    onerror="this.onerror=null;this.src='../../public/images/Auto%20carriers%20%20logo.jpg';"
+                    alt="Auto Carriers logo" width="300" height="92">
                 <h2>Welcome back</h2>
                 <p class="auth-subtitle">Use your control tower credentials to continue.</p>
                 <p class="auth-error" role="alert" aria-live="polite" hidden data-login-error>
@@ -35,7 +36,7 @@
                 </p>
 
                 <div class="form-floating">
-                    <input type="email" class="form-control" id="floatingInput" placeholder="leroy@kdglogistics.com"
+                    <input type="email" class="form-control" id="floatingInput" placeholder="rtms@autocarriers.co.za"
                         autocomplete="username" required>
                     <label for="floatingInput">Email</label>
                 </div>
@@ -53,7 +54,8 @@
                 </div>
 
                 <button class="btn btn-success w-100 py-2 auth-submit" type="submit">Sign in</button>
-                <p class="auth-meta" id="signin-footnote">Access restricted to authorised KDG EMS personnel.</p>
+                <p class="auth-meta" id="signin-footnote">Access restricted to authorised Auto Carriers RTMS personnel.
+                </p>
             </form>
         </section>
     </main>

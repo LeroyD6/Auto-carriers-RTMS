@@ -1,0 +1,104 @@
+[
+  { "employeeNumber": "AC900017", "name": "Mr Aaron Ntokozo Sibiya", "idNumber": "7009215569082" },
+  { "employeeNumber": "AC900016", "name": "Mr Bathandwa Jara", "idNumber": "7909185893083" },
+  { "employeeNumber": "AC900063", "name": "Mr Bongani Diniso", "idNumber": "8008036101082" },
+  { "employeeNumber": "836203", "name": "Mr Bongani Ernest Hadebe", "idNumber": "7112305585081" },
+  { "employeeNumber": "AC900136", "name": "Mr Bongani Lennox Dosi", "idNumber": "7009106039088" },
+  { "employeeNumber": "AC900037", "name": "Mr Bonginkosi Ludidi", "idNumber": "8610106491085" },
+  { "employeeNumber": "806658", "name": "Mr Donovan Jacobs", "idNumber": "7402055122080" },
+  { "employeeNumber": "AC900030", "name": "Mr Dumisani Mbatha", "idNumber": "8304196102089" },
+  { "employeeNumber": "AC900121", "name": "Mr Edward Nxumalo", "idNumber": "7908285561087" },
+  {
+    "employeeNumber": "AC900117",
+    "name": "Mr Frederick Jacob Pieterse",
+    "idNumber": "8208235042083"
+  },
+  { "employeeNumber": "801184", "name": "Mr Goodman Vukani Gwala", "idNumber": "7201145384084" },
+  {
+    "employeeNumber": "AC900069",
+    "name": "Mr Innocent Senzo Mthembu",
+    "idNumber": "7511215390088"
+  },
+  {
+    "employeeNumber": "801341",
+    "name": "Mr Jeffrey Zakhele Shabalala",
+    "idNumber": "6604115267083"
+  },
+  { "employeeNumber": "AC900118", "name": "Mr Lungi Ndlovu", "idNumber": "8308105705080" },
+  { "employeeNumber": "AC900027", "name": "Mr Mandlankosi Mjoli", "idNumber": "8009235897082" },
+  {
+    "employeeNumber": "AC900112",
+    "name": "Mr Mluleki Nicholas Mtshintshi",
+    "idNumber": "7708155661086"
+  },
+  { "employeeNumber": "8140679", "name": "Mr Mondli Terrence Dube", "idNumber": "8703205751085" },
+  { "employeeNumber": "AC900015", "name": "Mr Msizi Dladla", "idNumber": "7801085168080" },
+  { "employeeNumber": "AC900114", "name": "Mr Msizi Vincent Ndlovu", "idNumber": "7708295510086" },
+  { "employeeNumber": "801307", "name": "Mr Njabulo Stirton Dube", "idNumber": "6403255685083" },
+  { "employeeNumber": "AC900033", "name": "Mr Paulos Msomi", "idNumber": "7903205653080" },
+  { "employeeNumber": "AC900122", "name": "Mr Seeiso Moenti", "idNumber": "8304305581082" },
+  {
+    "employeeNumber": "AC900018",
+    "name": "Mr Senzo Richard Shabalala",
+    "idNumber": "7501285321089"
+  },
+  {
+    "employeeNumber": "801356",
+    "name": "Mr Sibongiseni David Lembede",
+    "idNumber": "7209175452085"
+  },
+  { "employeeNumber": "AC900067", "name": "Mr Sibonokuhle Bilibili", "idNumber": "9109136224086" },
+  { "employeeNumber": "AC900023", "name": "Mr Sicelo Luthando Zandi", "idNumber": "8005215357089" },
+  {
+    "employeeNumber": "801536",
+    "name": "Mr Siyabonga Emmanuel Khumalo",
+    "idNumber": "7908265771086"
+  },
+  {
+    "employeeNumber": "AC900070",
+    "name": "Mr Slindelo Grecoius Mbatha",
+    "idNumber": "8706036136087"
+  },
+  { "employeeNumber": "801330", "name": "Mr Sonwabiso Mbhele", "idNumber": "7104165427082" },
+  { "employeeNumber": "AC900071", "name": "Mr Thulani Moses Nokwe", "idNumber": "7904046630089" },
+  {
+    "employeeNumber": "AC900115",
+    "name": "Mr Vensin Soobramoney Naicker",
+    "idNumber": "7008275261085"
+  },
+  { "employeeNumber": "AC801317", "name": "Mr Wander Almon Mbele", "idNumber": "7101016782087" },
+  {
+    "employeeNumber": "AC90028",
+    "name": "Mr Wilfred Buleleni Dlamini",
+    "idNumber": "7501275686087"
+  },
+  { "employeeNumber": "AC900061", "name": "Mr William Jonga", "idNumber": "7911245673083" },
+  {
+    "employeeNumber": "AC900189",
+    "name": "Mr Bheki Cele Khalishwayo",
+    "idNumber": "8611215702081"
+  },
+  {
+    "employeeNumber": "AC900148",
+    "name": "Mr Thembinkosi John Mkhasibe",
+    "idNumber": "7301018063086"
+  },
+  {
+    "employeeNumber": "AC900142",
+    "name": "Mr Quinton Edwin Pieterson",
+    "idNumber": "7409045195084"
+  },
+  {
+    "employeeNumber": "AC900141",
+    "name": "Mr Mtolo Bethuel Nhlanhla",
+    "idNumber": "7807125832080"
+  },
+  { "employeeNumber": "AC900168", "name": "Mr Wiseman Ayanda Mbatha", "idNumber": "7909286036087" },
+  {
+    "employeeNumber": "AC900158",
+    "name": "Mr Mngomezulu Sikhumbizo Mdumiseni",
+    "idNumber": "8205225426086"
+  },
+  { "employeeNumber": "AC900193", "name": "Mr Petrus Msomi", "idNumber": "8310065920089" },
+  { "employeeNumber": "AC900161", "name": "Mr Luvo Mfecane", "idNumber": "9210065062081" }
+]
