@@ -246,6 +246,7 @@
                     <p class="eyebrow">Monthly Trend</p>
                     <h2>Monthly safety and overload profile</h2>
                     <p>Month-by-month view of KMs, collisions, traffic violations, overloaded trips, and overload mass.
+                        KMs include both long-haul and local fleets.
                     </p>
                 </div>
             </div>
@@ -259,7 +260,8 @@
                 <div>
                     <p class="eyebrow">Monthly Table</p>
                     <h2>Monthly operational data (Jan-Dec 2025)</h2>
-                    <p>Detailed monthly metrics added from the latest performance extract.</p>
+                    <p>Detailed monthly metrics added from the latest performance extract (KMs include long-haul and
+                        local fleets).</p>
                 </div>
             </div>
             <div class="doc-table-wrapper">
@@ -303,7 +305,7 @@
                 quarter: "Q1 Jan - March",
                 vehicles: 38,
                 trips: 923,
-                kms: 1993079,
+                kms: 2462253,
                 collisionThirdParty: 2,
                 collisionCompanyError: 3,
                 fatalities: 0,
@@ -324,7 +326,7 @@
                 quarter: "Q2 April - June",
                 vehicles: 38,
                 trips: 868,
-                kms: 1802009,
+                kms: 2103571,
                 collisionThirdParty: 6,
                 collisionCompanyError: 0,
                 fatalities: 0,
@@ -345,7 +347,7 @@
                 quarter: "Q3 July - September",
                 vehicles: 40,
                 trips: 1223,
-                kms: 2436757,
+                kms: 3102932,
                 collisionThirdParty: 4,
                 collisionCompanyError: 4,
                 fatalities: 0,
@@ -366,7 +368,7 @@
                 quarter: "Q4 October - December",
                 vehicles: 40,
                 trips: 1014,
-                kms: 2093221,
+                kms: 2752946,
                 collisionThirdParty: 6,
                 collisionCompanyError: 1,
                 fatalities: 0,
@@ -386,18 +388,18 @@
         ];
 
         const monthlyRows = [
-            { month: "Jan", kms: 671296, collisionThirdParty: 2, collisionCompanyError: 2, fatalities: 0, tripsOverloaded: 0, avgMassOverload: 0, trafficViolations: 2, serviceOverruns: 0 },
-            { month: "Feb", kms: 596081, collisionThirdParty: 0, collisionCompanyError: 1, fatalities: 0, tripsOverloaded: 0, avgMassOverload: 0, trafficViolations: 2, serviceOverruns: 0 },
-            { month: "Mar", kms: 725702, collisionThirdParty: 0, collisionCompanyError: 0, fatalities: 0, tripsOverloaded: 0, avgMassOverload: 0, trafficViolations: 12, serviceOverruns: 0 },
-            { month: "Apr", kms: 562970, collisionThirdParty: 1, collisionCompanyError: 0, fatalities: 0, tripsOverloaded: 1, avgMassOverload: 1080, trafficViolations: 5, serviceOverruns: 0 },
-            { month: "May", kms: 568427, collisionThirdParty: 3, collisionCompanyError: 0, fatalities: 0, tripsOverloaded: 2, avgMassOverload: 3000, trafficViolations: 12, serviceOverruns: 0 },
-            { month: "Jun", kms: 670612, collisionThirdParty: 2, collisionCompanyError: 0, fatalities: 0, tripsOverloaded: 0, avgMassOverload: 0, trafficViolations: 4, serviceOverruns: 0 },
-            { month: "Jul", kms: 785096, collisionThirdParty: 2, collisionCompanyError: 2, fatalities: 0, tripsOverloaded: 0, avgMassOverload: 0, trafficViolations: 6, serviceOverruns: 0 },
-            { month: "Aug", kms: 834933, collisionThirdParty: 1, collisionCompanyError: 1, fatalities: 0, tripsOverloaded: 0, avgMassOverload: 0, trafficViolations: 6, serviceOverruns: 0 },
-            { month: "Sept", kms: 816746, collisionThirdParty: 1, collisionCompanyError: 1, fatalities: 0, tripsOverloaded: 0, avgMassOverload: 0, trafficViolations: 2, serviceOverruns: 0 },
-            { month: "Oct", kms: 784094, collisionThirdParty: 4, collisionCompanyError: 0, fatalities: 0, tripsOverloaded: 1, avgMassOverload: 1070, trafficViolations: 2, serviceOverruns: 0 },
-            { month: "Nov", kms: 794499, collisionThirdParty: 1, collisionCompanyError: 0, fatalities: 0, tripsOverloaded: 1, avgMassOverload: 1000, trafficViolations: 1, serviceOverruns: 0 },
-            { month: "Dec", kms: 514628, collisionThirdParty: 1, collisionCompanyError: 1, fatalities: 0, tripsOverloaded: 2, avgMassOverload: 8560, trafficViolations: 0, serviceOverruns: 0 }
+            { month: "Jan", kms: 820089, collisionThirdParty: 2, collisionCompanyError: 2, fatalities: 0, tripsOverloaded: 0, avgMassOverload: 0, trafficViolations: 2, serviceOverruns: 0 },
+            { month: "Feb", kms: 724499, collisionThirdParty: 0, collisionCompanyError: 1, fatalities: 0, tripsOverloaded: 0, avgMassOverload: 0, trafficViolations: 2, serviceOverruns: 0 },
+            { month: "Mar", kms: 917665, collisionThirdParty: 0, collisionCompanyError: 0, fatalities: 0, tripsOverloaded: 0, avgMassOverload: 0, trafficViolations: 12, serviceOverruns: 0 },
+            { month: "Apr", kms: 684410, collisionThirdParty: 1, collisionCompanyError: 0, fatalities: 0, tripsOverloaded: 1, avgMassOverload: 1080, trafficViolations: 5, serviceOverruns: 0 },
+            { month: "May", kms: 673391, collisionThirdParty: 3, collisionCompanyError: 0, fatalities: 0, tripsOverloaded: 2, avgMassOverload: 3000, trafficViolations: 12, serviceOverruns: 0 },
+            { month: "Jun", kms: 745770, collisionThirdParty: 2, collisionCompanyError: 0, fatalities: 0, tripsOverloaded: 0, avgMassOverload: 0, trafficViolations: 4, serviceOverruns: 0 },
+            { month: "Jul", kms: 980943, collisionThirdParty: 2, collisionCompanyError: 2, fatalities: 0, tripsOverloaded: 0, avgMassOverload: 0, trafficViolations: 6, serviceOverruns: 0 },
+            { month: "Aug", kms: 1033121, collisionThirdParty: 1, collisionCompanyError: 1, fatalities: 0, tripsOverloaded: 0, avgMassOverload: 0, trafficViolations: 6, serviceOverruns: 0 },
+            { month: "Sept", kms: 1088868, collisionThirdParty: 1, collisionCompanyError: 1, fatalities: 0, tripsOverloaded: 0, avgMassOverload: 0, trafficViolations: 2, serviceOverruns: 0 },
+            { month: "Oct", kms: 1011904, collisionThirdParty: 4, collisionCompanyError: 0, fatalities: 0, tripsOverloaded: 1, avgMassOverload: 1070, trafficViolations: 2, serviceOverruns: 0 },
+            { month: "Nov", kms: 1073301, collisionThirdParty: 1, collisionCompanyError: 0, fatalities: 0, tripsOverloaded: 1, avgMassOverload: 1000, trafficViolations: 1, serviceOverruns: 0 },
+            { month: "Dec", kms: 667741, collisionThirdParty: 1, collisionCompanyError: 1, fatalities: 0, tripsOverloaded: 2, avgMassOverload: 8560, trafficViolations: 0, serviceOverruns: 0 }
         ];
 
         function sumBy(key) {
